@@ -271,29 +271,30 @@ If you have an existing project and want to add the framework:
   </Step>
 </Steps>
 
-### Method 3: Clone a Template
+### Method 3: Manual Setup
 
-Start from our official templates:
+If you prefer complete control over your setup, you can manually configure your project:
 
-<CodeGroup>
-  ```bash Basic Template
-  git clone https://github.com/framework/template-basic.git my-project
-  cd my-project
-  npm install
-  ```
+<Steps>
+  <Step title="Initialize the project">
+    ```bash
+    mkdir my-project
+    cd my-project
+    npm init -y
+    ```
+  </Step>
 
-  ```bash TypeScript + Tailwind
-  git clone https://github.com/framework/template-ts-tailwind.git my-project
-  cd my-project
-  npm install
-  ```
+  <Step title="Install core dependencies">
+    ```bash
+    npm install react react-dom
+    npm install -D vite @vitejs/plugin-react typescript @types/react @types/react-dom
+    ```
+  </Step>
 
-  ```bash Full-Stack Template
-  git clone https://github.com/framework/template-fullstack.git my-project
-  cd my-project
-  npm install
-  ```
-</CodeGroup>
+  <Step title="Add configuration files">
+    Create the necessary configuration files (vite.config.ts, tsconfig.json) as shown in Method 2.
+  </Step>
+</Steps>
 
 ## Verify Installation
 
@@ -468,11 +469,13 @@ Now that you have everything installed:
 
 ## Additional Resources
 
-- [GitHub Repository](https://github.com/framework/core)
-- [Community Discord](https://discord.gg/framework)
-- [Stack Overflow Tag](https://stackoverflow.com/questions/tagged/framework)
-- [Video Tutorials](https://youtube.com/framework)
+For more information about the technologies used:
+
+- [React Documentation](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Vite Guide](https://vitejs.dev/guide/)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
 
 <Note>
-  Need help? Our community is active on Discord and we monitor Stack Overflow daily. Don't hesitate to ask questions!
+  These resources provide comprehensive guides for the core technologies used in this project.
 </Note>
