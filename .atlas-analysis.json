@@ -1,0 +1,125 @@
+{
+  "projectType": "frontend",
+  "projectName": "Front-end Project",
+  "projectDescription": "Modern frontend application for a degree project with comprehensive component architecture and development tools",
+  "theme": "palm",
+  "primaryColor": "#3B82F6",
+  "lightColor": "#60A5FA",
+  "darkColor": "#1E40AF",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/architecture",
+              "concepts/components",
+              "concepts/state-management",
+              "concepts/routing"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/setup",
+              "development/workflow",
+              "development/testing",
+              "development/styling"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/building-components",
+              "guides/data-fetching",
+              "guides/forms",
+              "guides/authentication",
+              "guides/deployment"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Components",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "components/introduction",
+              "components/usage"
+            ]
+          },
+          {
+            "group": "UI Components",
+            "pages": [
+              "components/button",
+              "components/input",
+              "components/card",
+              "components/modal",
+              "components/navigation"
+            ]
+          },
+          {
+            "group": "Layout",
+            "pages": [
+              "components/grid",
+              "components/container",
+              "components/header",
+              "components/footer"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Utilities",
+            "pages": [
+              "api/hooks",
+              "api/helpers",
+              "api/constants"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "api/config",
+              "api/environment"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Component-based architecture",
+    "Responsive design system",
+    "State management integration",
+    "Routing and navigation",
+    "Form handling and validation",
+    "Authentication flows",
+    "API integration patterns",
+    "Testing utilities"
+  ],
+  "publicApiSurface": [
+    "UI Components (Button, Input, Card, Modal, Navigation)",
+    "Layout Components (Grid, Container, Header, Footer)",
+    "Custom Hooks (useAuth, useForm, useFetch)",
+    "Helper Functions (formatters, validators, utilities)",
+    "Configuration (theme, environment, constants)",
+    "Router Configuration",
+    "State Management Store",
+    "API Client"
+  ]
+}
