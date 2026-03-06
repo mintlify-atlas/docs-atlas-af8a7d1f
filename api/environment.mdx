@@ -1,0 +1,558 @@
+---
+title: 'Environment Variables'
+description: 'Environment variables configuration and usage guide'
+icon: 'leaf'
+---
+
+## Overview
+
+Environment variables are used to configure the application for different environments (development, staging, production) without changing code. They are typically stored in `.env` files.
+
+<Note>
+  Environment variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. All other variables are only available on the server side.
+</Note>
+
+---
+
+## API Configuration
+
+### NEXT_PUBLIC_API_URL
+
+Base URL for the backend API.
+
+<ParamField path="NEXT_PUBLIC_API_URL" type="string" required={true}>
+  The base URL for all API requests
+</ParamField>
+
+#### Example Values
+
+<CodeGroup>
+```bash Development
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+```
+
+```bash Staging
+NEXT_PUBLIC_API_URL=https://api-staging.example.com
+```
+
+```bash Production
+NEXT_PUBLIC_API_URL=https://api.example.com
+```
+</CodeGroup>
+
+---
+
+### NEXT_PUBLIC_API_VERSION
+
+API version to use.
+
+<ParamField path="NEXT_PUBLIC_API_VERSION" type="string" required={false}>
+  API version identifier (default: "v1")
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+NEXT_PUBLIC_API_VERSION=v2
+```
+</CodeGroup>
+
+---
+
+### API_TIMEOUT
+
+Request timeout in milliseconds.
+
+<ParamField path="API_TIMEOUT" type="number" required={false}>
+  Maximum time to wait for API responses (default: 30000)
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+API_TIMEOUT=60000
+```
+</CodeGroup>
+
+---
+
+## Authentication
+
+### NEXT_PUBLIC_AUTH_ENABLED
+
+Enable or disable authentication.
+
+<ParamField path="NEXT_PUBLIC_AUTH_ENABLED" type="boolean" required={false}>
+  Whether authentication is required (default: true)
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+NEXT_PUBLIC_AUTH_ENABLED=true
+```
+</CodeGroup>
+
+---
+
+### JWT_SECRET
+
+Secret key for JWT token signing (server-side only).
+
+<ParamField path="JWT_SECRET" type="string" required={true}>
+  Secret key used to sign and verify JWT tokens
+</ParamField>
+
+<Warning>
+  This variable should NEVER be exposed to the client. Do not prefix with `NEXT_PUBLIC_`.
+</Warning>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+JWT_SECRET=your-super-secret-key-change-in-production
+```
+</CodeGroup>
+
+---
+
+### SESSION_SECRET
+
+Secret for session encryption (server-side only).
+
+<ParamField path="SESSION_SECRET" type="string" required={true}>
+  Secret key for encrypting session data
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+SESSION_SECRET=another-secret-key-for-sessions
+```
+</CodeGroup>
+
+---
+
+### TOKEN_EXPIRY
+
+JWT token expiration time.
+
+<ParamField path="TOKEN_EXPIRY" type="string" required={false}>
+  Token expiration duration (default: "1h")
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+TOKEN_EXPIRY=24h
+```
+</CodeGroup>
+
+---
+
+## OAuth Providers
+
+### GOOGLE_CLIENT_ID
+
+Google OAuth client ID.
+
+<ParamField path="GOOGLE_CLIENT_ID" type="string" required={false}>
+  Client ID from Google Cloud Console
+</ParamField>
+
+### GOOGLE_CLIENT_SECRET
+
+Google OAuth client secret (server-side only).
+
+<ParamField path="GOOGLE_CLIENT_SECRET" type="string" required={false}>
+  Client secret from Google Cloud Console
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+GOOGLE_CLIENT_ID=123456789-abcdef.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-abc123def456
+```
+</CodeGroup>
+
+---
+
+### GITHUB_CLIENT_ID
+
+GitHub OAuth client ID.
+
+<ParamField path="GITHUB_CLIENT_ID" type="string" required={false}>
+  Client ID from GitHub OAuth App
+</ParamField>
+
+### GITHUB_CLIENT_SECRET
+
+GitHub OAuth client secret (server-side only).
+
+<ParamField path="GITHUB_CLIENT_SECRET" type="string" required={false}>
+  Client secret from GitHub OAuth App
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+GITHUB_CLIENT_ID=Iv1.1234567890abcdef
+GITHUB_CLIENT_SECRET=1234567890abcdef1234567890abcdef12345678
+```
+</CodeGroup>
+
+---
+
+## Database
+
+### DATABASE_URL
+
+Database connection string (server-side only).
+
+<ParamField path="DATABASE_URL" type="string" required={true}>
+  Full database connection URL
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash PostgreSQL
+DATABASE_URL=postgresql://user:password@localhost:5432/mydb
+```
+
+```bash MongoDB
+DATABASE_URL=mongodb://user:password@localhost:27017/mydb
+```
+
+```bash MySQL
+DATABASE_URL=mysql://user:password@localhost:3306/mydb
+```
+</CodeGroup>
+
+---
+
+## Analytics & Tracking
+
+### NEXT_PUBLIC_GA_ID
+
+Google Analytics tracking ID.
+
+<ParamField path="NEXT_PUBLIC_GA_ID" type="string" required={false}>
+  Google Analytics measurement ID (e.g., G-XXXXXXXXXX)
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
+</CodeGroup>
+
+---
+
+### NEXT_PUBLIC_SEGMENT_KEY
+
+Segment analytics write key.
+
+<ParamField path="NEXT_PUBLIC_SEGMENT_KEY" type="string" required={false}>
+  Segment write key for analytics
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+NEXT_PUBLIC_SEGMENT_KEY=abc123def456ghi789
+```
+</CodeGroup>
+
+---
+
+## Feature Flags
+
+### NEXT_PUBLIC_ENABLE_BETA_FEATURES
+
+Enable beta/experimental features.
+
+<ParamField path="NEXT_PUBLIC_ENABLE_BETA_FEATURES" type="boolean" required={false}>
+  Toggle beta features (default: false)
+</ParamField>
+
+### NEXT_PUBLIC_ENABLE_ANALYTICS
+
+Enable analytics tracking.
+
+<ParamField path="NEXT_PUBLIC_ENABLE_ANALYTICS" type="boolean" required={false}>
+  Toggle analytics (default: true)
+</ParamField>
+
+### NEXT_PUBLIC_ENABLE_NOTIFICATIONS
+
+Enable push notifications.
+
+<ParamField path="NEXT_PUBLIC_ENABLE_NOTIFICATIONS" type="boolean" required={false}>
+  Toggle notifications (default: true)
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+NEXT_PUBLIC_ENABLE_BETA_FEATURES=false
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+NEXT_PUBLIC_ENABLE_NOTIFICATIONS=true
+```
+</CodeGroup>
+
+---
+
+## File Storage
+
+### AWS_S3_BUCKET
+
+AWS S3 bucket name (server-side only).
+
+<ParamField path="AWS_S3_BUCKET" type="string" required={false}>
+  S3 bucket for file storage
+</ParamField>
+
+### AWS_ACCESS_KEY_ID
+
+AWS access key ID (server-side only).
+
+<ParamField path="AWS_ACCESS_KEY_ID" type="string" required={false}>
+  AWS IAM access key
+</ParamField>
+
+### AWS_SECRET_ACCESS_KEY
+
+AWS secret access key (server-side only).
+
+<ParamField path="AWS_SECRET_ACCESS_KEY" type="string" required={false}>
+  AWS IAM secret key
+</ParamField>
+
+### AWS_REGION
+
+AWS region.
+
+<ParamField path="AWS_REGION" type="string" required={false}>
+  AWS region (e.g., us-east-1)
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+AWS_S3_BUCKET=my-app-uploads
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_REGION=us-east-1
+```
+</CodeGroup>
+
+---
+
+## Email Service
+
+### SMTP_HOST
+
+SMTP server hostname (server-side only).
+
+<ParamField path="SMTP_HOST" type="string" required={false}>
+  SMTP server address
+</ParamField>
+
+### SMTP_PORT
+
+SMTP server port (server-side only).
+
+<ParamField path="SMTP_PORT" type="number" required={false}>
+  SMTP port (typically 587 or 465)
+</ParamField>
+
+### SMTP_USER
+
+SMTP username (server-side only).
+
+<ParamField path="SMTP_USER" type="string" required={false}>
+  SMTP authentication username
+</ParamField>
+
+### SMTP_PASSWORD
+
+SMTP password (server-side only).
+
+<ParamField path="SMTP_PASSWORD" type="string" required={false}>
+  SMTP authentication password
+</ParamField>
+
+### FROM_EMAIL
+
+Default sender email address.
+
+<ParamField path="FROM_EMAIL" type="string" required={false}>
+  Email address to send from
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash .env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+FROM_EMAIL=noreply@example.com
+```
+</CodeGroup>
+
+---
+
+## Application Settings
+
+### NODE_ENV
+
+Current environment.
+
+<ParamField path="NODE_ENV" type="'development' | 'staging' | 'production'" required={true}>
+  Application environment
+</ParamField>
+
+### PORT
+
+Server port.
+
+<ParamField path="PORT" type="number" required={false}>
+  Port for the application server (default: 3000)
+</ParamField>
+
+### NEXT_PUBLIC_APP_URL
+
+Public application URL.
+
+<ParamField path="NEXT_PUBLIC_APP_URL" type="string" required={true}>
+  Full URL where the app is hosted
+</ParamField>
+
+#### Example
+
+<CodeGroup>
+```bash Development
+NODE_ENV=development
+PORT=3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+```bash Production
+NODE_ENV=production
+PORT=80
+NEXT_PUBLIC_APP_URL=https://example.com
+```
+</CodeGroup>
+
+---
+
+## Usage in Code
+
+### Accessing Environment Variables
+
+<CodeGroup>
+```typescript Client-Side
+// Only NEXT_PUBLIC_ prefixed variables are available
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
+
+console.log('API URL:', apiUrl);
+```
+
+```typescript Server-Side
+// All environment variables are available
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const dbUrl = process.env.DATABASE_URL;
+const jwtSecret = process.env.JWT_SECRET;
+
+console.log('Database:', dbUrl);
+```
+
+```typescript Type-Safe Access
+// Define types for environment variables
+interface Env {
+  NEXT_PUBLIC_API_URL: string;
+  NEXT_PUBLIC_GA_ID?: string;
+  DATABASE_URL: string;
+  JWT_SECRET: string;
+}
+
+const env = process.env as unknown as Env;
+
+const apiUrl = env.NEXT_PUBLIC_API_URL;
+```
+</CodeGroup>
+
+---
+
+## Environment Files
+
+### File Structure
+
+<CodeGroup>
+```bash .env.local
+# Local development overrides (not committed to git)
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+DATABASE_URL=postgresql://localhost:5432/mydb_dev
+```
+
+```bash .env.development
+# Development environment defaults
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_ENABLE_BETA_FEATURES=true
+```
+
+```bash .env.production
+# Production environment
+NEXT_PUBLIC_API_URL=https://api.example.com
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+NEXT_PUBLIC_ENABLE_BETA_FEATURES=false
+```
+</CodeGroup>
+
+<Note>
+  The `.env.local` file takes precedence over other environment files and should never be committed to version control.
+</Note>
+
+---
+
+## Validation
+
+Validate required environment variables at startup:
+
+<CodeGroup>
+```typescript validation.ts
+const requiredEnvVars = [
+  'NEXT_PUBLIC_API_URL',
+  'DATABASE_URL',
+  'JWT_SECRET'
+];
+
+requiredEnvVars.forEach((envVar) => {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+});
+
+export function validateEnv() {
+  console.log('✓ All required environment variables are set');
+}
+```
+</CodeGroup>

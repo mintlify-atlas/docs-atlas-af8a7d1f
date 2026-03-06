@@ -1,0 +1,415 @@
+---
+title: 'Footer'
+description: 'Footer component patterns for site navigation, links, and information'
+---
+
+## Overview
+
+The Footer component provides consistent footer patterns with navigation links, social media, copyright information, and additional site-wide content.
+
+## Basic Usage
+
+```typescript
+import { Footer } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Footer 
+      copyright="© 2024 Your Company. All rights reserved."
+    />
+  );
+}
+```
+
+## Footer Variants
+
+<Tabs>
+  <Tab title="Simple">
+    ```typescript
+    <Footer copyright="© 2024 Company Name" />
+    ```
+    Minimal footer with just copyright text.
+  </Tab>
+  
+  <Tab title="With Links">
+    ```typescript
+    <Footer 
+      links={[
+        { label: 'Privacy Policy', href: '/privacy' },
+        { label: 'Terms of Service', href: '/terms' },
+        { label: 'Contact', href: '/contact' }
+      ]}
+      copyright="© 2024 Company Name"
+    />
+    ```
+    Footer with navigation links.
+  </Tab>
+  
+  <Tab title="With Columns">
+    ```typescript
+    <Footer 
+      columns={[
+        {
+          title: 'Product',
+          links: [
+            { label: 'Features', href: '/features' },
+            { label: 'Pricing', href: '/pricing' },
+            { label: 'FAQ', href: '/faq' }
+          ]
+        },
+        {
+          title: 'Company',
+          links: [
+            { label: 'About', href: '/about' },
+            { label: 'Blog', href: '/blog' },
+            { label: 'Careers', href: '/careers' }
+          ]
+        }
+      ]}
+      copyright="© 2024 Company Name"
+    />
+    ```
+    Multi-column footer with organized link groups.
+  </Tab>
+  
+  <Tab title="With Social">
+    ```typescript
+    <Footer 
+      social={[
+        { platform: 'twitter', href: 'https://twitter.com/company' },
+        { platform: 'github', href: 'https://github.com/company' },
+        { platform: 'linkedin', href: 'https://linkedin.com/company' }
+      ]}
+      copyright="© 2024 Company Name"
+    />
+    ```
+    Footer with social media links.
+  </Tab>
+</Tabs>
+
+## Footer Structure
+
+### Multi-Column Layout
+
+```typescript
+import { Footer, FooterColumn, FooterLink } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Footer>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem' }}>
+        <FooterColumn title="Product">
+          <FooterLink href="/features">Features</FooterLink>
+          <FooterLink href="/pricing">Pricing</FooterLink>
+          <FooterLink href="/changelog">Changelog</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Company">
+          <FooterLink href="/about">About</FooterLink>
+          <FooterLink href="/blog">Blog</FooterLink>
+          <FooterLink href="/careers">Careers</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Resources">
+          <FooterLink href="/docs">Documentation</FooterLink>
+          <FooterLink href="/guides">Guides</FooterLink>
+          <FooterLink href="/api">API Reference</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Legal">
+          <FooterLink href="/privacy">Privacy</FooterLink>
+          <FooterLink href="/terms">Terms</FooterLink>
+          <FooterLink href="/security">Security</FooterLink>
+        </FooterColumn>
+      </div>
+    </Footer>
+  );
+}
+```
+
+## Props
+
+### Footer Props
+
+<ParamField path="copyright" type="string">
+  Copyright text to display
+</ParamField>
+
+<ParamField path="links" type="array">
+  Array of link objects: `{ label: string, href: string }[]`
+</ParamField>
+
+<ParamField path="columns" type="array">
+  Array of column objects with title and links
+</ParamField>
+
+<ParamField path="social" type="array">
+  Array of social media links: `{ platform: string, href: string }[]`
+</ParamField>
+
+<ParamField path="logo" type="ReactNode">
+  Logo or brand element to display
+</ParamField>
+
+<ParamField path="variant" type="string" default="default">
+  Visual style: `default` or `minimal`
+</ParamField>
+
+<ParamField path="children" type="ReactNode">
+  Custom footer content
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional CSS class names
+</ParamField>
+
+### FooterColumn Props
+
+<ParamField path="title" type="string" required>
+  Column heading
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Column content (typically FooterLink components)
+</ParamField>
+
+### FooterLink Props
+
+<ParamField path="href" type="string" required>
+  Link destination
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Link text
+</ParamField>
+
+<ParamField path="external" type="boolean" default="false">
+  Opens link in new tab if true
+</ParamField>
+
+## TypeScript Interfaces
+
+```typescript
+interface Link {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface Column {
+  title: string;
+  links: Link[];
+}
+
+interface SocialLink {
+  platform: 'twitter' | 'github' | 'linkedin' | 'facebook' | 'instagram' | 'youtube';
+  href: string;
+}
+
+interface FooterProps {
+  copyright?: string;
+  links?: Link[];
+  columns?: Column[];
+  social?: SocialLink[];
+  logo?: React.ReactNode;
+  variant?: 'default' | 'minimal';
+  children?: React.ReactNode;
+  className?: string;
+}
+
+interface FooterColumnProps {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface FooterLinkProps {
+  href: string;
+  children: React.ReactNode;
+  external?: boolean;
+}
+```
+
+## Complete Examples
+
+### Full Footer
+
+```typescript
+import { Footer, FooterColumn, FooterLink } from '@yourproject/components';
+import { Twitter, Github, Linkedin } from 'lucide-react';
+
+function SiteFooter() {
+  return (
+    <Footer 
+      logo={
+        <div>
+          <img src="/logo.svg" alt="Company" />
+          <p>Building the future of software</p>
+        </div>
+      }
+      social={[
+        { platform: 'twitter', href: 'https://twitter.com/company' },
+        { platform: 'github', href: 'https://github.com/company' },
+        { platform: 'linkedin', href: 'https://linkedin.com/company' }
+      ]}
+      copyright="© 2024 Your Company. All rights reserved."
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '3rem' }}>
+        <FooterColumn title="Product">
+          <FooterLink href="/features">Features</FooterLink>
+          <FooterLink href="/pricing">Pricing</FooterLink>
+          <FooterLink href="/security">Security</FooterLink>
+          <FooterLink href="/roadmap">Roadmap</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Company">
+          <FooterLink href="/about">About Us</FooterLink>
+          <FooterLink href="/blog">Blog</FooterLink>
+          <FooterLink href="/careers">Careers</FooterLink>
+          <FooterLink href="/press">Press Kit</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Resources">
+          <FooterLink href="/docs">Documentation</FooterLink>
+          <FooterLink href="/guides">Guides</FooterLink>
+          <FooterLink href="/api">API Reference</FooterLink>
+          <FooterLink href="/support">Support</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Legal">
+          <FooterLink href="/privacy">Privacy Policy</FooterLink>
+          <FooterLink href="/terms">Terms of Service</FooterLink>
+          <FooterLink href="/cookies">Cookie Policy</FooterLink>
+          <FooterLink href="/licenses">Licenses</FooterLink>
+        </FooterColumn>
+      </div>
+    </Footer>
+  );
+}
+```
+
+### Minimal Footer
+
+```typescript
+import { Footer } from '@yourproject/components';
+
+function MinimalFooter() {
+  return (
+    <Footer 
+      variant="minimal"
+      links={[
+        { label: 'Privacy', href: '/privacy' },
+        { label: 'Terms', href: '/terms' },
+        { label: 'Contact', href: '/contact' }
+      ]}
+      copyright="© 2024 Company Name"
+    />
+  );
+}
+```
+
+### App Footer with Newsletter
+
+```typescript
+import { Footer, FooterColumn, FooterLink, Input, Button } from '@yourproject/components';
+import { useState } from 'react';
+
+function AppFooter() {
+  const [email, setEmail] = useState('');
+  
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle newsletter subscription
+  };
+  
+  return (
+    <Footer copyright="© 2024 Your App">
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '3rem' }}>
+        <div>
+          <h3>Stay Updated</h3>
+          <p>Get the latest updates and news delivered to your inbox.</p>
+          <form onSubmit={handleSubscribe} style={{ marginTop: '1rem' }}>
+            <Input 
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <Button type="submit" style={{ marginTop: '0.5rem' }}>
+              Subscribe
+            </Button>
+          </form>
+        </div>
+        
+        <FooterColumn title="Product">
+          <FooterLink href="/features">Features</FooterLink>
+          <FooterLink href="/pricing">Pricing</FooterLink>
+          <FooterLink href="/updates">Updates</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Support">
+          <FooterLink href="/help">Help Center</FooterLink>
+          <FooterLink href="/contact">Contact</FooterLink>
+          <FooterLink href="/status">Status</FooterLink>
+        </FooterColumn>
+        
+        <FooterColumn title="Legal">
+          <FooterLink href="/privacy">Privacy</FooterLink>
+          <FooterLink href="/terms">Terms</FooterLink>
+        </FooterColumn>
+      </div>
+    </Footer>
+  );
+}
+```
+
+## Layout Integration
+
+```typescript
+import { Footer, Container } from '@yourproject/components';
+
+function Layout({ children }) {
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1 }}>
+        {children}
+      </main>
+      
+      <Footer 
+        copyright="© 2024 Company"
+        links={[
+          { label: 'Privacy', href: '/privacy' },
+          { label: 'Terms', href: '/terms' }
+        ]}
+      />
+    </div>
+  );
+}
+```
+
+<Tip>
+  Place the Footer inside a flex container with `flex: 1` on the main content to ensure it stays at the bottom of the page, even with little content.
+</Tip>
+
+<Note>
+  The Footer component automatically adjusts to a mobile-friendly stacked layout on smaller screens.
+</Note>
+
+## Best Practices
+
+1. **Keep it organized**: Group related links into clear sections
+2. **Limit columns**: Use 3-4 columns maximum for better readability
+3. **Mobile-first**: Ensure footer stacks well on mobile devices
+4. **Essential links**: Include only important links; avoid clutter
+5. **Legal compliance**: Always include privacy policy and terms of service links
+6. **Accessibility**: Use semantic HTML and proper link text
+
+## Accessibility
+
+- Uses semantic HTML (`<footer>`)
+- Proper heading hierarchy for column titles
+- Keyboard navigable links
+- Screen reader compatible with descriptive link text
+- External links indicated with appropriate ARIA labels
+- Social media icons include text labels for accessibility

@@ -1,0 +1,603 @@
+---
+title: 'Styling'
+description: 'Learn about styling approaches, CSS methodologies, theming, and responsive design'
+icon: 'palette'
+---
+
+## Styling Architecture
+
+Our project uses a modern, utility-first approach to styling with Tailwind CSS, complemented by CSS Modules for component-specific styles when needed.
+
+### Tech Stack
+
+- **Tailwind CSS** - Utility-first CSS framework
+- **CSS Modules** - Scoped styles for complex components
+- **CSS Variables** - Theme tokens and design system values
+- **PostCSS** - CSS processing and optimization
+
+## Tailwind CSS
+
+### Configuration
+
+Tailwind is configured in `tailwind.config.ts`:
+
+```typescript
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+        },
+        secondary: {
+          50: '#faf5ff',
+          500: '#a855f7',
+          600: '#9333ea',
+        },
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'monospace'],
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/container-queries'),
+  ],
+}
+
+export default config
+```
+
+### Global Styles
+
+Define global styles in `src/app/globals.css`:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+```
+
+### Utility Classes
+
+Common patterns using Tailwind utilities:
+
+<CodeGroup>
+```tsx Layout
+// Flexbox centering
+<div className="flex items-center justify-center min-h-screen">
+  <div className="max-w-md w-full">
+    {/* Content */}
+  </div>
+</div>
+
+// Grid layout
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {items.map(item => (
+    <div key={item.id}>{/* Item */}</div>
+  ))}
+</div>
+
+// Container
+<div className="container mx-auto px-4 py-8">
+  {/* Content */}
+</div>
+```
+
+```tsx Typography
+// Headings
+<h1 className="text-4xl font-bold tracking-tight">
+  Page Title
+</h1>
+
+<h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+  Section Title
+</h2>
+
+// Body text
+<p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+  Lorem ipsum dolor sit amet.
+</p>
+
+// Truncated text
+<p className="truncate max-w-xs">
+  Very long text that will be truncated
+</p>
+```
+
+```tsx Interactive
+// Button
+<button className="
+  px-4 py-2 rounded-lg
+  bg-primary-600 hover:bg-primary-700
+  text-white font-medium
+  transition-colors duration-200
+  focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+  disabled:opacity-50 disabled:cursor-not-allowed
+">
+  Click me
+</button>
+
+// Input
+<input className="
+  w-full px-3 py-2 rounded-md
+  border border-gray-300 dark:border-gray-700
+  bg-white dark:bg-gray-800
+  focus:outline-none focus:ring-2 focus:ring-primary-500
+  placeholder:text-gray-400
+" />
+```
+</CodeGroup>
+
+## Component Styling Patterns
+
+### Class Variance Authority (CVA)
+
+Use CVA for component variants:
+
+```typescript
+// components/ui/button.tsx
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary-600 text-white hover:bg-primary-700',
+        destructive: 'bg-red-600 text-white hover:bg-red-700',
+        outline: 'border border-gray-300 bg-transparent hover:bg-gray-100',
+        ghost: 'hover:bg-gray-100 hover:text-gray-900',
+        link: 'text-primary-600 underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        icon: 'h-10 w-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, ...props }, ref) => {
+    return (
+      <button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+)
+
+export { Button, buttonVariants }
+```
+
+Usage:
+
+```tsx
+<Button variant="default" size="lg">Click me</Button>
+<Button variant="outline" size="sm">Cancel</Button>
+<Button variant="ghost" size="icon"><Icon /></Button>
+```
+
+### CSS Modules
+
+For complex component styles, use CSS Modules:
+
+```css
+/* components/Card/Card.module.css */
+.card {
+  @apply rounded-lg border border-gray-200 bg-white shadow-sm;
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  @apply shadow-md;
+  transform: translateY(-2px);
+}
+
+.cardHeader {
+  @apply p-6 border-b border-gray-200;
+}
+
+.cardContent {
+  @apply p-6;
+}
+
+.cardFooter {
+  @apply p-6 border-t border-gray-200 bg-gray-50;
+}
+```
+
+```tsx
+// components/Card/Card.tsx
+import styles from './Card.module.css'
+import { cn } from '@/lib/utils'
+
+interface CardProps {
+  className?: string
+  children: React.ReactNode
+}
+
+export function Card({ className, children }: CardProps) {
+  return (
+    <div className={cn(styles.card, className)}>
+      {children}
+    </div>
+  )
+}
+
+Card.Header = function CardHeader({ children }: { children: React.ReactNode }) {
+  return <div className={styles.cardHeader}>{children}</div>
+}
+
+Card.Content = function CardContent({ children }: { children: React.ReactNode }) {
+  return <div className={styles.cardContent}>{children}</div>
+}
+
+Card.Footer = function CardFooter({ children }: { children: React.ReactNode }) {
+  return <div className={styles.cardFooter}>{children}</div>
+}
+```
+
+## Theming
+
+### Dark Mode
+
+Implement dark mode using Tailwind's dark mode class strategy:
+
+```tsx
+// components/ThemeProvider.tsx
+'use client'
+
+import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { type ThemeProviderProps } from 'next-themes/dist/types'
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+}
+```
+
+```tsx
+// app/layout.tsx
+import { ThemeProvider } from '@/components/ThemeProvider'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+```tsx
+// components/ThemeToggle.tsx
+'use client'
+
+import { useTheme } from 'next-themes'
+import { Moon, Sun } from 'lucide-react'
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+    >
+      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <span className="sr-only">Toggle theme</span>
+    </button>
+  )
+}
+```
+
+### Custom Themes
+
+Create multiple theme variants:
+
+```typescript
+// lib/themes.ts
+export const themes = {
+  blue: {
+    primary: 'hsl(221, 83%, 53%)',
+    secondary: 'hsl(210, 40%, 96%)',
+  },
+  green: {
+    primary: 'hsl(142, 76%, 36%)',
+    secondary: 'hsl(138, 76%, 97%)',
+  },
+  purple: {
+    primary: 'hsl(271, 91%, 65%)',
+    secondary: 'hsl(270, 100%, 98%)',
+  },
+}
+```
+
+## Responsive Design
+
+### Breakpoints
+
+Tailwind's default breakpoints:
+
+- `sm`: 640px
+- `md`: 768px
+- `lg`: 1024px
+- `xl`: 1280px
+- `2xl`: 1536px
+
+<Steps>
+  <Step title="Mobile-First Approach">
+    Start with mobile styles, then add larger breakpoints:
+    
+    ```tsx
+    <div className="
+      w-full          // Mobile: full width
+      md:w-1/2        // Tablet: half width
+      lg:w-1/3        // Desktop: third width
+      px-4            // Mobile: 1rem padding
+      md:px-6         // Tablet: 1.5rem padding
+      lg:px-8         // Desktop: 2rem padding
+    ">
+      Content
+    </div>
+    ```
+  </Step>
+  
+  <Step title="Responsive Typography">
+    Scale text appropriately across breakpoints:
+    
+    ```tsx
+    <h1 className="
+      text-3xl md:text-4xl lg:text-5xl
+      font-bold
+      leading-tight
+    ">
+      Responsive Heading
+    </h1>
+    ```
+  </Step>
+  
+  <Step title="Conditional Rendering">
+    Show/hide elements at different breakpoints:
+    
+    ```tsx
+    {/* Mobile menu */}
+    <div className="block lg:hidden">
+      <MobileMenu />
+    </div>
+    
+    {/* Desktop navigation */}
+    <nav className="hidden lg:block">
+      <DesktopNav />
+    </nav>
+    ```
+  </Step>
+</Steps>
+
+### Container Queries
+
+Use container queries for component-level responsive design:
+
+```tsx
+<div className="@container">
+  <div className="@sm:grid @sm:grid-cols-2 @lg:grid-cols-3 gap-4">
+    {/* Cards adapt to container size, not viewport */}
+  </div>
+</div>
+```
+
+## Animation
+
+### Transitions
+
+```tsx
+// Hover transitions
+<button className="
+  transition-all duration-200 ease-in-out
+  hover:scale-105 hover:shadow-lg
+">
+  Hover me
+</button>
+
+// Color transitions
+<div className="
+  bg-blue-500
+  transition-colors duration-300
+  hover:bg-blue-600
+">
+  Smooth color change
+</div>
+```
+
+### Keyframe Animations
+
+Define custom animations in Tailwind config:
+
+```typescript
+// tailwind.config.ts
+theme: {
+  extend: {
+    keyframes: {
+      'fade-in': {
+        '0%': { opacity: '0', transform: 'translateY(10px)' },
+        '100%': { opacity: '1', transform: 'translateY(0)' },
+      },
+      'slide-in': {
+        '0%': { transform: 'translateX(-100%)' },
+        '100%': { transform: 'translateX(0)' },
+      },
+    },
+    animation: {
+      'fade-in': 'fade-in 0.3s ease-out',
+      'slide-in': 'slide-in 0.3s ease-out',
+    },
+  },
+}
+```
+
+Usage:
+
+```tsx
+<div className="animate-fade-in">
+  Fades in on mount
+</div>
+```
+
+## Best Practices
+
+<Tip>
+**Composition over duplication** - Extract repeated utility combinations into reusable components instead of duplicating class strings.
+</Tip>
+
+<Warning>
+**Avoid inline styles** - Use Tailwind utilities or CSS Modules instead of inline styles for better maintainability and performance.
+</Warning>
+
+### Do's
+
+- Use the `cn()` utility for conditional classes
+- Extract complex class strings into component variants
+- Leverage CSS variables for theming
+- Use semantic color names in your design system
+- Test responsive layouts on real devices
+- Optimize for accessibility (focus states, color contrast)
+
+### Don'ts
+
+- Don't use arbitrary values excessively (e.g., `w-[37px]`)
+- Don't mix CSS methodologies unnecessarily
+- Don't forget to purge unused styles in production
+- Don't hardcode colors/spacing - use theme tokens
+- Don't ignore mobile viewport testing
+
+### Performance Tips
+
+```typescript
+// lib/utils.ts
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+// Efficiently merge Tailwind classes
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
+
+Usage:
+
+```tsx
+import { cn } from '@/lib/utils'
+
+<button className={cn(
+  'base-button-classes',
+  isActive && 'active-classes',
+  isPrimary ? 'primary-classes' : 'secondary-classes',
+  className // Allow prop overrides
+)}>
+  Button
+</button>
+```

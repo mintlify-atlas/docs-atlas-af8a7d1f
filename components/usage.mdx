@@ -1,0 +1,173 @@
+---
+title: 'Usage Guide'
+description: 'Learn how to install, import, and customize components in your project'
+---
+
+## Installation
+
+Install the component library using your preferred package manager:
+
+<Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install @yourproject/components
+    ```
+  </Tab>
+  
+  <Tab title="yarn">
+    ```bash
+    yarn add @yourproject/components
+    ```
+  </Tab>
+  
+  <Tab title="pnpm">
+    ```bash
+    pnpm add @yourproject/components
+    ```
+  </Tab>
+</Tabs>
+
+## Importing Components
+
+Components can be imported individually for optimal tree-shaking:
+
+```typescript
+import { Button, Input, Card } from '@yourproject/components';
+
+function MyComponent() {
+  return (
+    <Card>
+      <Input placeholder="Enter your name" />
+      <Button>Submit</Button>
+    </Card>
+  );
+}
+```
+
+## Using Props
+
+All components are built with TypeScript and provide full type safety. Props are well-documented and will show autocomplete in your IDE:
+
+```typescript
+import { Button } from '@yourproject/components';
+import type { ButtonProps } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Button 
+      variant="primary"
+      size="lg"
+      disabled={false}
+      onClick={() => console.log('Clicked!')}
+    >
+      Click Me
+    </Button>
+  );
+}
+```
+
+<Note>
+  Hover over any prop in your IDE to see its type definition and description.
+</Note>
+
+## Customization
+
+### Using CSS Variables
+
+Components use CSS variables for theming, making it easy to customize colors, spacing, and more:
+
+```css
+:root {
+  --primary-color: #0066cc;
+  --primary-hover: #0052a3;
+  --border-radius: 8px;
+  --font-family: 'Inter', sans-serif;
+}
+```
+
+### Custom Styles
+
+All components accept a `className` prop for custom styling:
+
+```typescript
+import { Button } from '@yourproject/components';
+import styles from './MyComponent.module.css';
+
+function Example() {
+  return (
+    <Button className={styles.customButton}>
+      Custom Styled Button
+    </Button>
+  );
+}
+```
+
+### Style Props
+
+Many components also accept inline style props for quick adjustments:
+
+```typescript
+<Button style={{ marginTop: '1rem', width: '100%' }}>
+  Full Width Button
+</Button>
+```
+
+## Composition
+
+Components are designed to work together seamlessly:
+
+```typescript
+import { Card, Input, Button, Grid } from '@yourproject/components';
+
+function LoginForm() {
+  return (
+    <Card>
+      <Grid gap="md">
+        <Input type="email" placeholder="Email" />
+        <Input type="password" placeholder="Password" />
+        <Button variant="primary" fullWidth>
+          Sign In
+        </Button>
+      </Grid>
+    </Card>
+  );
+}
+```
+
+## TypeScript Support
+
+The library is written in TypeScript and includes full type definitions:
+
+```typescript
+import type { 
+  ButtonProps, 
+  InputProps, 
+  CardProps 
+} from '@yourproject/components';
+
+interface FormProps {
+  onSubmit: (data: FormData) => void;
+  submitButton?: ButtonProps;
+}
+
+function Form({ onSubmit, submitButton }: FormProps) {
+  return (
+    <form onSubmit={onSubmit}>
+      <Button {...submitButton}>Submit</Button>
+    </form>
+  );
+}
+```
+
+<Tip>
+  Enable strict mode in your TypeScript config for the best type checking experience.
+</Tip>
+
+## Next Steps
+
+Now that you know the basics, explore individual component documentation:
+
+- [Button Component](/components/button)
+- [Input Component](/components/input)
+- [Card Component](/components/card)
+- [Layout System](/components/grid)

@@ -1,0 +1,375 @@
+---
+title: 'Grid'
+description: 'Flexible grid system for creating responsive layouts'
+---
+
+## Overview
+
+The Grid component provides a powerful and flexible layout system based on CSS Grid. It makes it easy to create responsive, multi-column layouts without manual media queries.
+
+## Basic Usage
+
+```typescript
+import { Grid } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Grid cols={3}>
+      <div>Item 1</div>
+      <div>Item 2</div>
+      <div>Item 3</div>
+      <div>Item 4</div>
+      <div>Item 5</div>
+      <div>Item 6</div>
+    </Grid>
+  );
+}
+```
+
+## Column Configuration
+
+### Fixed Columns
+
+```typescript
+<Grid cols={2}>
+  {/* 2 equal columns */}
+</Grid>
+
+<Grid cols={4}>
+  {/* 4 equal columns */}
+</Grid>
+```
+
+### Responsive Columns
+
+```typescript
+<Grid 
+  cols={{ 
+    mobile: 1, 
+    tablet: 2, 
+    desktop: 4 
+  }}
+>
+  {/* 1 column on mobile, 2 on tablet, 4 on desktop */}
+</Grid>
+```
+
+### Custom Column Widths
+
+```typescript
+<Grid template="1fr 2fr 1fr">
+  <div>Sidebar</div>
+  <div>Main Content (2x wider)</div>
+  <div>Sidebar</div>
+</Grid>
+```
+
+## Gap Spacing
+
+<Tabs>
+  <Tab title="Uniform Gap">
+    ```typescript
+    <Grid cols={3} gap="md">
+      {/* Equal gap between all items */}
+    </Grid>
+    ```
+  </Tab>
+  
+  <Tab title="Custom Gap">
+    ```typescript
+    <Grid cols={3} gap="20px">
+      {/* Custom pixel gap */}
+    </Grid>
+    ```
+  </Tab>
+  
+  <Tab title="Row and Column Gap">
+    ```typescript
+    <Grid 
+      cols={3} 
+      rowGap="lg" 
+      columnGap="sm"
+    >
+      {/* Different gaps for rows and columns */}
+    </Grid>
+    ```
+  </Tab>
+</Tabs>
+
+## Grid Item Spans
+
+Control how many columns/rows individual items span:
+
+```typescript
+import { Grid, GridItem } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Grid cols={4}>
+      <GridItem colSpan={2}>
+        This spans 2 columns
+      </GridItem>
+      <GridItem colSpan={2}>
+        This spans 2 columns
+      </GridItem>
+      <GridItem colSpan={3}>
+        This spans 3 columns
+      </GridItem>
+      <div>Regular item</div>
+    </Grid>
+  );
+}
+```
+
+### Row Spans
+
+```typescript
+<Grid cols={3} rows={3}>
+  <GridItem rowSpan={2}>
+    This spans 2 rows
+  </GridItem>
+  <div>Item 2</div>
+  <div>Item 3</div>
+  <div>Item 4</div>
+  <div>Item 5</div>
+</Grid>
+```
+
+## Alignment
+
+### Horizontal Alignment
+
+```typescript
+<Grid cols={3} justifyItems="center">
+  {/* Items centered horizontally */}
+</Grid>
+
+<Grid cols={3} justifyItems="start">
+  {/* Items aligned to start */}
+</Grid>
+
+<Grid cols={3} justifyItems="end">
+  {/* Items aligned to end */}
+</Grid>
+```
+
+### Vertical Alignment
+
+```typescript
+<Grid cols={3} alignItems="center">
+  {/* Items centered vertically */}
+</Grid>
+
+<Grid cols={3} alignItems="start">
+  {/* Items aligned to top */}
+</Grid>
+
+<Grid cols={3} alignItems="end">
+  {/* Items aligned to bottom */}
+</Grid>
+```
+
+## Props
+
+### Grid Props
+
+<ParamField path="cols" type="number | object">
+  Number of columns or responsive object: `{ mobile: 1, tablet: 2, desktop: 3 }`
+</ParamField>
+
+<ParamField path="rows" type="number">
+  Number of rows
+</ParamField>
+
+<ParamField path="template" type="string">
+  Custom grid-template-columns value (e.g., `"1fr 2fr 1fr"`)
+</ParamField>
+
+<ParamField path="gap" type="string" default="md">
+  Gap between all items: `none`, `sm`, `md`, `lg`, `xl`, or custom value
+</ParamField>
+
+<ParamField path="rowGap" type="string">
+  Gap between rows (overrides `gap` for rows)
+</ParamField>
+
+<ParamField path="columnGap" type="string">
+  Gap between columns (overrides `gap` for columns)
+</ParamField>
+
+<ParamField path="justifyItems" type="string">
+  Horizontal alignment: `start`, `center`, `end`, or `stretch`
+</ParamField>
+
+<ParamField path="alignItems" type="string">
+  Vertical alignment: `start`, `center`, `end`, or `stretch`
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Grid items
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional CSS class names
+</ParamField>
+
+### GridItem Props
+
+<ParamField path="colSpan" type="number">
+  Number of columns this item should span
+</ParamField>
+
+<ParamField path="rowSpan" type="number">
+  Number of rows this item should span
+</ParamField>
+
+<ParamField path="colStart" type="number">
+  Column line where item starts
+</ParamField>
+
+<ParamField path="colEnd" type="number">
+  Column line where item ends
+</ParamField>
+
+<ParamField path="rowStart" type="number">
+  Row line where item starts
+</ParamField>
+
+<ParamField path="rowEnd" type="number">
+  Row line where item ends
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Item content
+</ParamField>
+
+## TypeScript Interfaces
+
+```typescript
+type ResponsiveCols = {
+  mobile?: number;
+  tablet?: number;
+  desktop?: number;
+};
+
+interface GridProps {
+  cols?: number | ResponsiveCols;
+  rows?: number;
+  template?: string;
+  gap?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  rowGap?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  columnGap?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  justifyItems?: 'start' | 'center' | 'end' | 'stretch';
+  alignItems?: 'start' | 'center' | 'end' | 'stretch';
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface GridItemProps {
+  colSpan?: number;
+  rowSpan?: number;
+  colStart?: number;
+  colEnd?: number;
+  rowStart?: number;
+  rowEnd?: number;
+  children: React.ReactNode;
+  className?: string;
+}
+```
+
+## Layout Examples
+
+### Card Grid
+
+```typescript
+import { Grid, Card } from '@yourproject/components';
+
+function CardGrid() {
+  return (
+    <Grid cols={{ mobile: 1, tablet: 2, desktop: 3 }} gap="lg">
+      <Card>Card 1</Card>
+      <Card>Card 2</Card>
+      <Card>Card 3</Card>
+      <Card>Card 4</Card>
+      <Card>Card 5</Card>
+      <Card>Card 6</Card>
+    </Grid>
+  );
+}
+```
+
+### Dashboard Layout
+
+```typescript
+import { Grid, GridItem, Card } from '@yourproject/components';
+
+function Dashboard() {
+  return (
+    <Grid cols={4} rows={3} gap="md">
+      <GridItem colSpan={4}>
+        <Card>Header Widget (Full Width)</Card>
+      </GridItem>
+      
+      <GridItem colSpan={2} rowSpan={2}>
+        <Card>Main Chart (Large)</Card>
+      </GridItem>
+      
+      <GridItem colSpan={2}>
+        <Card>Stats Widget</Card>
+      </GridItem>
+      
+      <GridItem>
+        <Card>Small Widget 1</Card>
+      </GridItem>
+      
+      <GridItem>
+        <Card>Small Widget 2</Card>
+      </GridItem>
+    </Grid>
+  );
+}
+```
+
+### Holy Grail Layout
+
+```typescript
+import { Grid, GridItem } from '@yourproject/components';
+
+function Layout() {
+  return (
+    <Grid 
+      template="200px 1fr 200px" 
+      rows={3}
+      gap="md"
+      style={{ minHeight: '100vh' }}
+    >
+      <GridItem colSpan={3}>
+        <header>Header</header>
+      </GridItem>
+      
+      <aside>Left Sidebar</aside>
+      <main>Main Content</main>
+      <aside>Right Sidebar</aside>
+      
+      <GridItem colSpan={3}>
+        <footer>Footer</footer>
+      </GridItem>
+    </Grid>
+  );
+}
+```
+
+<Tip>
+  Use responsive column configuration to automatically adapt your layout for different screen sizes without media queries.
+</Tip>
+
+<Note>
+  For simple column layouts, Grid is often simpler than Flexbox. For single-direction layouts with dynamic sizing, consider using Flexbox instead.
+</Note>
+
+## Accessibility
+
+- Uses semantic HTML structure
+- Maintains logical reading order for screen readers
+- Keyboard navigation works naturally with document flow
+- Consider using `order` property carefully to avoid disconnecting visual and DOM order

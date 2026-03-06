@@ -1,0 +1,316 @@
+---
+title: 'Container'
+description: 'Container component for consistent content width and spacing'
+---
+
+## Overview
+
+The Container component provides consistent content width, padding, and centering across your application. It's the foundation for page layouts and helps maintain readable line lengths.
+
+## Basic Usage
+
+```typescript
+import { Container } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Container>
+      <h1>Page Title</h1>
+      <p>Content goes here with consistent padding and max-width.</p>
+    </Container>
+  );
+}
+```
+
+## Sizes
+
+Containers come in multiple sizes to accommodate different content needs:
+
+<Tabs>
+  <Tab title="Small">
+    ```typescript
+    <Container size="sm">
+      Narrow container, ideal for focused content like articles (max-width: 640px)
+    </Container>
+    ```
+  </Tab>
+  
+  <Tab title="Medium">
+    ```typescript
+    <Container size="md">
+      Standard container for most pages (max-width: 768px)
+    </Container>
+    ```
+  </Tab>
+  
+  <Tab title="Large">
+    ```typescript
+    <Container size="lg">
+      Wide container for dashboards (max-width: 1024px)
+    </Container>
+    ```
+  </Tab>
+  
+  <Tab title="XL">
+    ```typescript
+    <Container size="xl">
+      Extra wide container (max-width: 1280px)
+    </Container>
+    ```
+  </Tab>
+  
+  <Tab title="Full">
+    ```typescript
+    <Container size="full">
+      Full width, no max-width constraint
+    </Container>
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  The default size is `lg` if not specified.
+</Note>
+
+## Padding
+
+Control the horizontal padding of the container:
+
+```typescript
+<Container padding="none">
+  No padding
+</Container>
+
+<Container padding="sm">
+  Small padding
+</Container>
+
+<Container padding="md">
+  Medium padding (default)
+</Container>
+
+<Container padding="lg">
+  Large padding
+</Container>
+```
+
+## Centering
+
+By default, containers are centered. You can disable this:
+
+```typescript
+<Container centered={false}>
+  This container is not centered (aligned to left)
+</Container>
+```
+
+## Fluid Container
+
+Create a container that maintains padding but has no max-width:
+
+```typescript
+<Container fluid>
+  Full width container with padding
+</Container>
+```
+
+## Props
+
+<ParamField path="size" type="string" default="lg">
+  Container max-width: `sm` (640px), `md` (768px), `lg` (1024px), `xl` (1280px), or `full`
+</ParamField>
+
+<ParamField path="padding" type="string" default="md">
+  Horizontal padding: `none`, `sm`, `md`, or `lg`
+</ParamField>
+
+<ParamField path="centered" type="boolean" default="true">
+  Whether to center the container horizontally
+</ParamField>
+
+<ParamField path="fluid" type="boolean" default="false">
+  If true, removes max-width while keeping padding
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  The content to display inside the container
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional CSS class names to apply
+</ParamField>
+
+<ParamField path="as" type="string" default="'div'">
+  HTML element to render: `div`, `main`, `section`, `article`, etc.
+</ParamField>
+
+## TypeScript Interface
+
+```typescript
+interface ContainerProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  centered?: boolean;
+  fluid?: boolean;
+  children: React.ReactNode;
+  className?: string;
+  as?: keyof JSX.IntrinsicElements;
+}
+```
+
+## Layout Examples
+
+### Basic Page Layout
+
+```typescript
+import { Container } from '@yourproject/components';
+
+function Page() {
+  return (
+    <Container as="main">
+      <h1>Welcome</h1>
+      <p>This is a standard page with centered content.</p>
+    </Container>
+  );
+}
+```
+
+### Article Layout
+
+```typescript
+import { Container } from '@yourproject/components';
+
+function Article() {
+  return (
+    <Container size="sm" as="article">
+      <h1>Article Title</h1>
+      <p>The narrow container width improves readability for long-form content.</p>
+      <p>Optimal line length is around 60-70 characters per line.</p>
+    </Container>
+  );
+}
+```
+
+### Dashboard Layout
+
+```typescript
+import { Container, Grid, Card } from '@yourproject/components';
+
+function Dashboard() {
+  return (
+    <Container size="xl">
+      <h1>Dashboard</h1>
+      <Grid cols={3} gap="lg">
+        <Card>Widget 1</Card>
+        <Card>Widget 2</Card>
+        <Card>Widget 3</Card>
+      </Grid>
+    </Container>
+  );
+}
+```
+
+### Nested Containers
+
+```typescript
+import { Container } from '@yourproject/components';
+
+function Page() {
+  return (
+    <>
+      {/* Full-width hero section */}
+      <div style={{ background: '#f5f5f5' }}>
+        <Container size="xl">
+          <h1>Hero Section</h1>
+        </Container>
+      </div>
+      
+      {/* Standard content */}
+      <Container size="md">
+        <p>Main content with comfortable reading width.</p>
+      </Container>
+      
+      {/* Wide content section */}
+      <Container size="xl">
+        <Grid cols={3}>
+          <Card>Feature 1</Card>
+          <Card>Feature 2</Card>
+          <Card>Feature 3</Card>
+        </Grid>
+      </Container>
+    </>
+  );
+}
+```
+
+### Full Width Section with Padded Content
+
+```typescript
+import { Container } from '@yourproject/components';
+
+function Page() {
+  return (
+    <div style={{ background: '#f0f0f0' }}>
+      <Container fluid padding="lg">
+        {/* Full width but with consistent padding */}
+        <img 
+          src="banner.jpg" 
+          alt="Banner" 
+          style={{ width: '100%' }} 
+        />
+      </Container>
+    </div>
+  );
+}
+```
+
+## Responsive Behavior
+
+Containers automatically adjust their padding on smaller screens:
+
+- **Desktop**: Full padding as specified
+- **Tablet**: Slightly reduced padding
+- **Mobile**: Minimal padding to maximize screen space
+
+```typescript
+<Container size="lg">
+  {/* 
+    Automatically adapts:
+    - Desktop: max-width 1024px with large padding
+    - Tablet: max-width 768px with medium padding  
+    - Mobile: full width with small padding
+  */}
+</Container>
+```
+
+<Tip>
+  Use smaller container sizes (`sm` or `md`) for content-focused pages like blog posts and documentation to improve readability.
+</Tip>
+
+<Tip>
+  Use larger container sizes (`xl` or `full`) for application interfaces and dashboards that need more horizontal space.
+</Tip>
+
+## Best Practices
+
+1. **Choose the right size**: Use `sm` for articles, `md` for standard pages, `lg` for applications, and `xl` for dashboards
+
+2. **Consistent usage**: Use the same container size throughout similar pages for visual consistency
+
+3. **Nested sections**: Wrap full-width colored sections around containers for visual variety:
+   ```typescript
+   <section style={{ background: '#f5f5f5' }}>
+     <Container>
+       Content here
+     </Container>
+   </section>
+   ```
+
+4. **Semantic HTML**: Use the `as` prop to render semantic elements (`main`, `article`, `section`) for better accessibility
+
+## Accessibility
+
+- Uses semantic HTML elements when specified with `as` prop
+- Maintains proper document structure
+- Ensures content remains accessible and readable at all viewport sizes
+- Provides consistent spacing for better visual hierarchy

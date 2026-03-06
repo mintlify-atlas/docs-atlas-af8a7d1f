@@ -1,0 +1,459 @@
+---
+title: 'Building Reusable Components'
+description: 'Learn how to create maintainable, reusable components with best practices and real-world examples'
+---
+
+## Overview
+
+Building reusable components is essential for maintaining a scalable frontend codebase. This guide covers component design patterns, composition strategies, and best practices.
+
+## Component Design Principles
+
+<Steps>
+  <Step title="Single Responsibility">
+    Each component should do one thing well. If a component becomes too complex, break it into smaller pieces.
+  </Step>
+  
+  <Step title="Props Interface">
+    Design clear, typed interfaces for your component props. This makes components self-documenting and easier to use.
+  </Step>
+  
+  <Step title="Composition Over Configuration">
+    Prefer composing smaller components rather than creating large, configurable components with many props.
+  </Step>
+</Steps>
+
+## Creating a Basic Component
+
+<CodeGroup>
+```tsx Button.tsx
+import { ReactNode } from 'react';
+
+interface ButtonProps {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+export function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  onClick
+}: ButtonProps) {
+  const baseStyles = 'rounded font-medium transition-colors focus:outline-none focus:ring-2';
+  
+  const variantStyles = {
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
+    outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50 focus:ring-blue-500'
+  };
+  
+  const sizeStyles = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-6 py-3 text-lg'
+  };
+  
+  return (
+    <button
+      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]}`}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+```tsx Usage
+import { Button } from './Button';
+
+function App() {
+  return (
+    <div className="space-y-4">
+      <Button variant="primary" size="lg">
+        Primary Button
+      </Button>
+      
+      <Button variant="outline" onClick={() => console.log('Clicked')}>
+        Outline Button
+      </Button>
+      
+      <Button variant="secondary" size="sm" disabled>
+        Disabled Button
+      </Button>
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+<Tip>
+Use TypeScript interfaces to define props. This provides autocomplete and type safety when using components.
+</Tip>
+
+## Compound Components Pattern
+
+Compound components work together to form a complete UI element. This pattern provides flexibility while maintaining a clean API.
+
+<CodeGroup>
+```tsx Card.tsx
+import { ReactNode, createContext, useContext } from 'react';
+
+interface CardContextValue {
+  variant: 'default' | 'elevated' | 'outlined';
+}
+
+const CardContext = createContext<CardContextValue>({ variant: 'default' });
+
+interface CardProps {
+  children: ReactNode;
+  variant?: 'default' | 'elevated' | 'outlined';
+  className?: string;
+}
+
+export function Card({ children, variant = 'default', className = '' }: CardProps) {
+  const variantStyles = {
+    default: 'bg-white border border-gray-200',
+    elevated: 'bg-white shadow-lg',
+    outlined: 'bg-transparent border-2 border-gray-300'
+  };
+  
+  return (
+    <CardContext.Provider value={{ variant }}>
+      <div className={`rounded-lg ${variantStyles[variant]} ${className}`}>
+        {children}
+      </div>
+    </CardContext.Provider>
+  );
+}
+
+interface CardHeaderProps {
+  children: ReactNode;
+  className?: string;
+}
+
+Card.Header = function CardHeader({ children, className = '' }: CardHeaderProps) {
+  return (
+    <div className={`px-6 py-4 border-b border-gray-200 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+interface CardBodyProps {
+  children: ReactNode;
+  className?: string;
+}
+
+Card.Body = function CardBody({ children, className = '' }: CardBodyProps) {
+  return (
+    <div className={`px-6 py-4 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+interface CardFooterProps {
+  children: ReactNode;
+  className?: string;
+}
+
+Card.Footer = function CardFooter({ children, className = '' }: CardFooterProps) {
+  return (
+    <div className={`px-6 py-4 border-t border-gray-200 ${className}`}>
+      {children}
+    </div>
+  );
+};
+```
+
+```tsx Usage
+import { Card } from './Card';
+import { Button } from './Button';
+
+function UserProfile() {
+  return (
+    <Card variant="elevated">
+      <Card.Header>
+        <h2 className="text-xl font-bold">User Profile</h2>
+      </Card.Header>
+      
+      <Card.Body>
+        <p className="text-gray-600">View and edit your profile information.</p>
+        <div className="mt-4">
+          <label className="block text-sm font-medium">Email</label>
+          <p className="text-gray-900">user@example.com</p>
+        </div>
+      </Card.Body>
+      
+      <Card.Footer>
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline">Cancel</Button>
+          <Button variant="primary">Save Changes</Button>
+        </div>
+      </Card.Footer>
+    </Card>
+  );
+}
+```
+</CodeGroup>
+
+<Note>
+Compound components provide a flexible API that's easy to understand and use. Users can compose the parts they need without dealing with complex prop configurations.
+</Note>
+
+## Render Props Pattern
+
+Render props allow you to share logic between components while giving consumers full control over rendering.
+
+<CodeGroup>
+```tsx DataLoader.tsx
+import { ReactNode, useEffect, useState } from 'react';
+
+interface DataLoaderProps<T> {
+  url: string;
+  children: (data: {
+    data: T | null;
+    loading: boolean;
+    error: Error | null;
+    refetch: () => void;
+  }) => ReactNode;
+}
+
+export function DataLoader<T>({ url, children }: DataLoaderProps<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch');
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, [url]);
+  
+  return <>{children({ data, loading, error, refetch: fetchData })}</>;
+}
+```
+
+```tsx Usage
+import { DataLoader } from './DataLoader';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+function UserList() {
+  return (
+    <DataLoader<User[]> url="/api/users">
+      {({ data, loading, error, refetch }) => {
+        if (loading) return <div>Loading users...</div>;
+        if (error) return <div>Error: {error.message}</div>;
+        if (!data) return null;
+        
+        return (
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Users</h2>
+              <button onClick={refetch} className="text-blue-600">
+                Refresh
+              </button>
+            </div>
+            <ul className="space-y-2">
+              {data.map(user => (
+                <li key={user.id} className="p-4 border rounded">
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-gray-600">{user.email}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }}
+    </DataLoader>
+  );
+}
+```
+</CodeGroup>
+
+## Custom Hooks for Reusable Logic
+
+Extract component logic into custom hooks for maximum reusability.
+
+```tsx useToggle.ts
+import { useState, useCallback } from 'react';
+
+export function useToggle(initialValue = false) {
+  const [value, setValue] = useState(initialValue);
+  
+  const toggle = useCallback(() => {
+    setValue(v => !v);
+  }, []);
+  
+  const setTrue = useCallback(() => {
+    setValue(true);
+  }, []);
+  
+  const setFalse = useCallback(() => {
+    setValue(false);
+  }, []);
+  
+  return { value, toggle, setTrue, setFalse };
+}
+```
+
+```tsx Modal.tsx
+import { ReactNode } from 'react';
+import { useToggle } from './useToggle';
+
+interface ModalProps {
+  trigger: (open: () => void) => ReactNode;
+  children: ReactNode;
+  title: string;
+}
+
+export function Modal({ trigger, children, title }: ModalProps) {
+  const { value: isOpen, setTrue: open, setFalse: close } = useToggle();
+  
+  if (!isOpen) return <>{trigger(open)}</>;
+  
+  return (
+    <>
+      {trigger(open)}
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg p-6 max-w-md w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">{title}</h2>
+            <button onClick={close} className="text-gray-500 hover:text-gray-700">
+              ✕
+            </button>
+          </div>
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+```
+
+<Warning>
+Avoid creating too many abstraction layers. Sometimes a simple component is better than a highly abstracted one. Balance reusability with simplicity.
+</Warning>
+
+## Component Testing
+
+Test components to ensure they work as expected and remain stable during refactoring.
+
+```tsx Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders children correctly', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+  
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+  
+  it('does not call onClick when disabled', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick} disabled>Click me</Button>);
+    
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+  
+  it('applies correct variant styles', () => {
+    const { rerender } = render(<Button variant="primary">Button</Button>);
+    const button = screen.getByText('Button');
+    
+    expect(button).toHaveClass('bg-blue-600');
+    
+    rerender(<Button variant="outline">Button</Button>);
+    expect(button).toHaveClass('border-2');
+  });
+});
+```
+
+## Best Practices
+
+<Tabs>
+  <Tab title="Performance">
+    - Use `React.memo()` for expensive components that receive the same props frequently
+    - Memoize callbacks with `useCallback` when passing to child components
+    - Use `useMemo` for expensive computations
+    - Lazy load components that aren't immediately needed
+    
+    ```tsx
+    import { memo } from 'react';
+    
+    export const ExpensiveComponent = memo(function ExpensiveComponent({ data }) {
+      // Component implementation
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Accessibility">
+    - Use semantic HTML elements
+    - Add ARIA labels where needed
+    - Ensure keyboard navigation works
+    - Test with screen readers
+    
+    ```tsx
+    <button
+      aria-label="Close dialog"
+      onClick={onClose}
+      className="close-button"
+    >
+      ✕
+    </button>
+    ```
+  </Tab>
+  
+  <Tab title="Maintainability">
+    - Keep components small and focused
+    - Use consistent naming conventions
+    - Document complex logic with comments
+    - Extract magic numbers into constants
+    
+    ```tsx
+    const MAX_ITEMS = 10;
+    const ANIMATION_DURATION = 300;
+    
+    // Clear, self-documenting code
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+- Explore [Data Fetching](/guides/data-fetching) patterns for loading data in components
+- Learn about [Form Handling](/guides/forms) for building interactive forms
+- Check out [Authentication](/guides/authentication) for protecting components

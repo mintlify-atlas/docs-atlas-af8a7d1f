@@ -1,0 +1,368 @@
+---
+title: 'Header'
+description: 'Header component patterns for page titles, actions, and navigation'
+---
+
+## Overview
+
+The Header component provides consistent page header patterns with titles, descriptions, breadcrumbs, and action buttons. It helps establish clear page hierarchy and context.
+
+## Basic Usage
+
+```typescript
+import { Header } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Header 
+      title="Page Title"
+      description="A brief description of this page"
+    />
+  );
+}
+```
+
+## Header Variants
+
+<Tabs>
+  <Tab title="Simple">
+    ```typescript
+    <Header title="Dashboard" />
+    ```
+    Basic header with just a title.
+  </Tab>
+  
+  <Tab title="With Description">
+    ```typescript
+    <Header 
+      title="User Management"
+      description="View and manage all users in your organization"
+    />
+    ```
+    Header with title and descriptive text.
+  </Tab>
+  
+  <Tab title="With Actions">
+    ```typescript
+    <Header 
+      title="Products"
+      description="Manage your product catalog"
+      actions={
+        <Button variant="primary">
+          Add Product
+        </Button>
+      }
+    />
+    ```
+    Header with action buttons aligned to the right.
+  </Tab>
+  
+  <Tab title="With Breadcrumbs">
+    ```typescript
+    <Header 
+      title="Product Details"
+      breadcrumbs={
+        <Breadcrumbs>
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem href="/products">Products</BreadcrumbItem>
+          <BreadcrumbItem>Details</BreadcrumbItem>
+        </Breadcrumbs>
+      }
+    />
+    ```
+    Header with navigation breadcrumbs.
+  </Tab>
+</Tabs>
+
+## Header with Tabs
+
+Combine the header with tab navigation:
+
+```typescript
+import { Header, Tabs, Tab } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Header 
+      title="Account Settings"
+      description="Manage your account preferences"
+      tabs={
+        <Tabs>
+          <Tab>Profile</Tab>
+          <Tab>Security</Tab>
+          <Tab>Notifications</Tab>
+          <Tab>Billing</Tab>
+        </Tabs>
+      }
+    />
+  );
+}
+```
+
+## Header Sizes
+
+```typescript
+<Header 
+  size="sm" 
+  title="Small Header" 
+/>
+
+<Header 
+  size="md" 
+  title="Medium Header" 
+/>
+
+<Header 
+  size="lg" 
+  title="Large Header" 
+/>
+```
+
+## Props
+
+<ParamField path="title" type="string" required>
+  The main heading text
+</ParamField>
+
+<ParamField path="description" type="string">
+  Optional description or subtitle text
+</ParamField>
+
+<ParamField path="breadcrumbs" type="ReactNode">
+  Breadcrumb navigation component
+</ParamField>
+
+<ParamField path="actions" type="ReactNode">
+  Action buttons or elements aligned to the right
+</ParamField>
+
+<ParamField path="tabs" type="ReactNode">
+  Tab navigation component
+</ParamField>
+
+<ParamField path="size" type="string" default="md">
+  Header size: `sm`, `md`, or `lg`
+</ParamField>
+
+<ParamField path="divider" type="boolean" default="true">
+  Whether to show a bottom border divider
+</ParamField>
+
+<ParamField path="sticky" type="boolean" default="false">
+  Whether the header sticks to the top when scrolling
+</ParamField>
+
+<ParamField path="children" type="ReactNode">
+  Additional custom content
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional CSS class names
+</ParamField>
+
+## TypeScript Interface
+
+```typescript
+interface HeaderProps {
+  title: string;
+  description?: string;
+  breadcrumbs?: React.ReactNode;
+  actions?: React.ReactNode;
+  tabs?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
+  divider?: boolean;
+  sticky?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+}
+```
+
+## Complete Examples
+
+### Dashboard Header
+
+```typescript
+import { Header, Button } from '@yourproject/components';
+import { Plus, Download } from 'lucide-react';
+
+function DashboardHeader() {
+  return (
+    <Header 
+      title="Dashboard"
+      description="Welcome back! Here's what's happening today."
+      actions={
+        <>
+          <Button variant="secondary" icon={<Download />}>
+            Export
+          </Button>
+          <Button variant="primary" icon={<Plus />}>
+            New Report
+          </Button>
+        </>
+      }
+    />
+  );
+}
+```
+
+### Settings Page Header
+
+```typescript
+import { Header, Breadcrumbs, BreadcrumbItem, Tabs, Tab } from '@yourproject/components';
+import { useState } from 'react';
+
+function SettingsHeader() {
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  return (
+    <Header 
+      title="Settings"
+      breadcrumbs={
+        <Breadcrumbs>
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem>Settings</BreadcrumbItem>
+        </Breadcrumbs>
+      }
+      tabs={
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tab value="profile">Profile</Tab>
+          <Tab value="security">Security</Tab>
+          <Tab value="notifications">Notifications</Tab>
+          <Tab value="team">Team</Tab>
+        </Tabs>
+      }
+      sticky
+    />
+  );
+}
+```
+
+### List Page Header
+
+```typescript
+import { Header, Button, Input } from '@yourproject/components';
+import { Plus, Search } from 'lucide-react';
+
+function UsersHeader() {
+  return (
+    <Header 
+      title="Users"
+      description="Manage team members and their permissions"
+      actions={
+        <>
+          <Input 
+            leftIcon={<Search />}
+            placeholder="Search users..."
+            size="sm"
+          />
+          <Button variant="primary" icon={<Plus />}>
+            Invite User
+          </Button>
+        </>
+      }
+    />
+  );
+}
+```
+
+### Detail Page Header
+
+```typescript
+import { Header, Breadcrumbs, BreadcrumbItem, Button } from '@yourproject/components';
+import { Edit, Trash2, MoreVertical } from 'lucide-react';
+
+function ProductDetailHeader({ product }) {
+  return (
+    <Header 
+      title={product.name}
+      description={`SKU: ${product.sku} • Stock: ${product.stock} units`}
+      breadcrumbs={
+        <Breadcrumbs>
+          <BreadcrumbItem href="/">Home</BreadcrumbItem>
+          <BreadcrumbItem href="/products">Products</BreadcrumbItem>
+          <BreadcrumbItem>{product.name}</BreadcrumbItem>
+        </Breadcrumbs>
+      }
+      actions={
+        <>
+          <Button variant="secondary" icon={<Edit />}>
+            Edit
+          </Button>
+          <Button variant="danger" icon={<Trash2 />}>
+            Delete
+          </Button>
+          <Button variant="secondary" icon={<MoreVertical />} />
+        </>
+      }
+    />
+  );
+}
+```
+
+### Sticky Header for Long Pages
+
+```typescript
+import { Header, Container } from '@yourproject/components';
+
+function LongPage() {
+  return (
+    <>
+      <Header 
+        title="Documentation"
+        description="Complete guide to using our platform"
+        sticky
+        divider
+      />
+      
+      <Container>
+        {/* Long page content */}
+      </Container>
+    </>
+  );
+}
+```
+
+## Layout Integration
+
+```typescript
+import { Header, Container } from '@yourproject/components';
+
+function PageLayout({ children }) {
+  return (
+    <>
+      <Header 
+        title="Page Title"
+        description="Page description"
+      />
+      
+      <Container>
+        {children}
+      </Container>
+    </>
+  );
+}
+```
+
+<Tip>
+  Use the `sticky` prop for headers on long pages to keep navigation and actions accessible while scrolling.
+</Tip>
+
+<Note>
+  The Header component automatically handles responsive behavior, stacking elements vertically on smaller screens.
+</Note>
+
+## Best Practices
+
+1. **Clear hierarchy**: Use descriptive titles that clearly indicate the page purpose
+2. **Concise descriptions**: Keep descriptions brief (1-2 sentences)
+3. **Relevant actions**: Include only primary actions in the header
+4. **Consistent structure**: Use similar header patterns across related pages
+5. **Breadcrumbs**: Include breadcrumbs on detail/nested pages to show navigation context
+
+## Accessibility
+
+- Uses semantic HTML (`<header>`, `<h1>`)
+- Proper heading hierarchy for screen readers
+- Action buttons are keyboard accessible
+- Sticky headers maintain focus management
+- ARIA labels for navigation elements

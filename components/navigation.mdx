@@ -1,0 +1,350 @@
+---
+title: 'Navigation'
+description: 'Navigation components including navbar, sidebar, and breadcrumbs'
+---
+
+## Overview
+
+Navigation components help users move through your application with clear wayfinding. This includes top navigation bars, side navigation menus, and breadcrumb trails.
+
+## Navbar
+
+The Navbar component provides a horizontal navigation bar typically placed at the top of the page.
+
+### Basic Navbar
+
+```typescript
+import { Navbar, NavbarBrand, NavbarNav, NavbarItem } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Navbar>
+      <NavbarBrand>
+        <img src="logo.svg" alt="Logo" />
+        My App
+      </NavbarBrand>
+      
+      <NavbarNav>
+        <NavbarItem href="/">Home</NavbarItem>
+        <NavbarItem href="/about">About</NavbarItem>
+        <NavbarItem href="/contact">Contact</NavbarItem>
+      </NavbarNav>
+    </Navbar>
+  );
+}
+```
+
+### Navbar with Actions
+
+```typescript
+import { Navbar, NavbarBrand, NavbarNav, NavbarItem, Button } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Navbar>
+      <NavbarBrand href="/">
+        My App
+      </NavbarBrand>
+      
+      <NavbarNav>
+        <NavbarItem href="/products">Products</NavbarItem>
+        <NavbarItem href="/pricing">Pricing</NavbarItem>
+        <NavbarItem href="/docs">Docs</NavbarItem>
+      </NavbarNav>
+      
+      <div>
+        <Button variant="secondary" size="sm">Sign In</Button>
+        <Button variant="primary" size="sm">Sign Up</Button>
+      </div>
+    </Navbar>
+  );
+}
+```
+
+### Navbar Props
+
+<ParamField path="variant" type="string" default="default">
+  Visual style: `default`, `transparent`, or `solid`
+</ParamField>
+
+<ParamField path="sticky" type="boolean" default="false">
+  Whether the navbar sticks to the top when scrolling
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Navbar content
+</ParamField>
+
+## Sidebar
+
+The Sidebar component provides vertical navigation, typically placed on the left side of the page.
+
+### Basic Sidebar
+
+```typescript
+import { Sidebar, SidebarSection, SidebarItem } from '@yourproject/components';
+import { Home, Settings, Users, FileText } from 'lucide-react';
+
+function Example() {
+  return (
+    <Sidebar>
+      <SidebarSection title="Main">
+        <SidebarItem icon={<Home />} href="/">
+          Dashboard
+        </SidebarItem>
+        <SidebarItem icon={<Users />} href="/users">
+          Users
+        </SidebarItem>
+        <SidebarItem icon={<FileText />} href="/documents">
+          Documents
+        </SidebarItem>
+      </SidebarSection>
+      
+      <SidebarSection title="Settings">
+        <SidebarItem icon={<Settings />} href="/settings">
+          Settings
+        </SidebarItem>
+      </SidebarSection>
+    </Sidebar>
+  );
+}
+```
+
+### Collapsible Sidebar
+
+```typescript
+import { Sidebar, SidebarItem } from '@yourproject/components';
+import { useState } from 'react';
+
+function Example() {
+  const [collapsed, setCollapsed] = useState(false);
+  
+  return (
+    <Sidebar 
+      collapsed={collapsed}
+      onToggle={() => setCollapsed(!collapsed)}
+    >
+      <SidebarItem icon={<Home />}>
+        Dashboard
+      </SidebarItem>
+      <SidebarItem icon={<Users />}>
+        Users
+      </SidebarItem>
+    </Sidebar>
+  );
+}
+```
+
+### Sidebar Props
+
+<ParamField path="collapsed" type="boolean" default="false">
+  Whether the sidebar is in collapsed state (icon-only)
+</ParamField>
+
+<ParamField path="onToggle" type="function">
+  Callback when toggle button is clicked: `() => void`
+</ParamField>
+
+<ParamField path="width" type="string" default="240px">
+  Width of the expanded sidebar
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Sidebar content
+</ParamField>
+
+### SidebarItem Props
+
+<ParamField path="icon" type="ReactNode">
+  Icon to display before the text
+</ParamField>
+
+<ParamField path="href" type="string">
+  Link destination
+</ParamField>
+
+<ParamField path="active" type="boolean" default="false">
+  Whether this item is currently active
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Item label
+</ParamField>
+
+## Breadcrumbs
+
+Breadcrumbs show the current page's location within the navigation hierarchy.
+
+### Basic Breadcrumbs
+
+```typescript
+import { Breadcrumbs, BreadcrumbItem } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Breadcrumbs>
+      <BreadcrumbItem href="/">Home</BreadcrumbItem>
+      <BreadcrumbItem href="/products">Products</BreadcrumbItem>
+      <BreadcrumbItem href="/products/category">Category</BreadcrumbItem>
+      <BreadcrumbItem>Current Page</BreadcrumbItem>
+    </Breadcrumbs>
+  );
+}
+```
+
+### Dynamic Breadcrumbs
+
+```typescript
+import { Breadcrumbs, BreadcrumbItem } from '@yourproject/components';
+import { usePathname } from 'next/navigation';
+
+function Example() {
+  const pathname = usePathname();
+  const segments = pathname.split('/').filter(Boolean);
+  
+  return (
+    <Breadcrumbs>
+      <BreadcrumbItem href="/">Home</BreadcrumbItem>
+      {segments.map((segment, index) => {
+        const href = `/${segments.slice(0, index + 1).join('/')}`;
+        const isLast = index === segments.length - 1;
+        
+        return (
+          <BreadcrumbItem 
+            key={segment} 
+            href={isLast ? undefined : href}
+          >
+            {segment}
+          </BreadcrumbItem>
+        );
+      })}
+    </Breadcrumbs>
+  );
+}
+```
+
+### Breadcrumbs Props
+
+<ParamField path="separator" type="ReactNode" default="'/'">
+  Custom separator between breadcrumb items
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  BreadcrumbItem components
+</ParamField>
+
+### BreadcrumbItem Props
+
+<ParamField path="href" type="string">
+  Link destination (omit for current/last item)
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  Item label
+</ParamField>
+
+## TypeScript Interfaces
+
+```typescript
+interface NavbarProps {
+  variant?: 'default' | 'transparent' | 'solid';
+  sticky?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface SidebarProps {
+  collapsed?: boolean;
+  onToggle?: () => void;
+  width?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface SidebarItemProps {
+  icon?: React.ReactNode;
+  href?: string;
+  active?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+interface BreadcrumbsProps {
+  separator?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface BreadcrumbItemProps {
+  href?: string;
+  children: React.ReactNode;
+}
+```
+
+## Complete Layout Example
+
+```typescript
+import { 
+  Navbar, 
+  NavbarBrand, 
+  NavbarNav, 
+  NavbarItem,
+  Sidebar, 
+  SidebarItem,
+  Breadcrumbs,
+  BreadcrumbItem,
+  Container
+} from '@yourproject/components';
+import { Home, Users, Settings } from 'lucide-react';
+
+function Layout({ children }) {
+  return (
+    <div>
+      <Navbar sticky>
+        <NavbarBrand href="/">My App</NavbarBrand>
+        <NavbarNav>
+          <NavbarItem href="/">Home</NavbarItem>
+          <NavbarItem href="/about">About</NavbarItem>
+        </NavbarNav>
+      </Navbar>
+      
+      <div style={{ display: 'flex' }}>
+        <Sidebar>
+          <SidebarItem icon={<Home />} href="/">
+            Dashboard
+          </SidebarItem>
+          <SidebarItem icon={<Users />} href="/users">
+            Users
+          </SidebarItem>
+          <SidebarItem icon={<Settings />} href="/settings">
+            Settings
+          </SidebarItem>
+        </Sidebar>
+        
+        <main style={{ flex: 1 }}>
+          <Container>
+            <Breadcrumbs>
+              <BreadcrumbItem href="/">Home</BreadcrumbItem>
+              <BreadcrumbItem>Current Page</BreadcrumbItem>
+            </Breadcrumbs>
+            
+            {children}
+          </Container>
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+<Tip>
+  Combine Navbar, Sidebar, and Breadcrumbs for a complete navigation system that helps users understand where they are and how to navigate your app.
+</Tip>
+
+## Accessibility
+
+- Uses semantic HTML with `<nav>` elements
+- Includes proper ARIA labels and roles
+- Supports keyboard navigation (Tab, Enter, Arrow keys)
+- Indicates current/active page for screen readers
+- Focus management with visible focus indicators

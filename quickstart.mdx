@@ -1,80 +1,291 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get your first application running in under 5 minutes
 ---
 
-## Get started in three steps
+# Quick Start
 
-Get your documentation site running locally and make your first customization.
+This guide will help you create and run your first application in minutes. We'll walk through creating a new project, understanding the structure, and building your first component.
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Before you begin, ensure you have:
 
-### Step 2: Deploy your changes
+- **Node.js 18.x or higher** installed on your machine
+- **npm**, **yarn**, or **pnpm** package manager
+- A code editor (we recommend VS Code with TypeScript support)
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+<Steps>
+  <Step title="Create a New Project">
+    Use the CLI to scaffold a new project with all the necessary configuration:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    <CodeGroup>
+      ```bash npm
+      npx create-frontend-app my-app
+      cd my-app
+      ```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+      ```bash yarn
+      yarn create frontend-app my-app
+      cd my-app
+      ```
 
-### Step 3: Go live
+      ```bash pnpm
+      pnpm create frontend-app my-app
+      cd my-app
+      ```
+    </CodeGroup>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    The CLI will prompt you to choose:
+    - **Template**: Start with TypeScript (recommended) or JavaScript
+    - **Styling**: Tailwind CSS, CSS Modules, or Styled Components
+    - **Features**: Routing, State Management, Testing utilities
 
-## Next steps
+    <Note>
+      For this quick start, select **TypeScript** with **Tailwind CSS** and enable **Routing**.
+    </Note>
+  </Step>
 
-Now that you have your docs running, explore these key features:
+  <Step title="Explore the Project Structure">
+    Your new project includes everything you need to get started:
+
+    ```plaintext
+    my-app/
+    ├── src/
+    │   ├── components/     # Reusable UI components
+    │   ├── pages/          # Route pages
+    │   ├── styles/         # Global styles
+    │   ├── utils/          # Helper functions
+    │   └── App.tsx         # Root component
+    ├── public/             # Static assets
+    ├── package.json
+    └── tsconfig.json
+    ```
+
+    Key files:
+    - `src/App.tsx` - Your application's entry point
+    - `src/pages/` - File-based routing (each file is a route)
+    - `src/components/` - Where you'll build reusable components
+  </Step>
+
+  <Step title="Start the Development Server">
+    Launch the dev server with hot module replacement:
+
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+
+      ```bash pnpm
+      pnpm dev
+      ```
+    </CodeGroup>
+
+    Your application will be available at `http://localhost:3000`
+
+    <Note>
+      Changes to your code will automatically refresh in the browser without losing state.
+    </Note>
+  </Step>
+
+  <Step title="Create Your First Component">
+    Let's build a simple interactive component. Create a new file `src/components/Welcome.tsx`:
+
+    ```tsx src/components/Welcome.tsx
+    import { useState } from 'react'
+
+    export function Welcome() {
+      const [name, setName] = useState('')
+      const [greeting, setGreeting] = useState('')
+
+      const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        setGreeting(`Hello, ${name}! Welcome to our framework!`)
+      }
+
+      return (
+        <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Welcome Component
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                What's your name?
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your name"
+              />
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Greet Me
+            </button>
+          </form>
+
+          {greeting && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-green-800 font-medium">{greeting}</p>
+            </div>
+          )}
+        </div>
+      )
+    }
+    ```
+
+    This component demonstrates:
+    - **State management** with `useState`
+    - **Form handling** with controlled inputs
+    - **Conditional rendering** for the greeting message
+    - **Tailwind CSS** for styling
+  </Step>
+
+  <Step title="Use Your Component">
+    Import and use your new component in `src/App.tsx`:
+
+    ```tsx src/App.tsx
+    import { Welcome } from './components/Welcome'
+
+    export default function App() {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+          <div className="container mx-auto px-4">
+            <h1 className="text-4xl font-bold text-center mb-8 text-gray-900">
+              My First App
+            </h1>
+            <Welcome />
+          </div>
+        </div>
+      )
+    }
+    ```
+
+    Save the file and see your changes instantly in the browser!
+  </Step>
+
+  <Step title="Build for Production">
+    When you're ready to deploy, create an optimized production build:
+
+    <CodeGroup>
+      ```bash npm
+      npm run build
+      ```
+
+      ```bash yarn
+      yarn build
+      ```
+
+      ```bash pnpm
+      pnpm build
+      ```
+    </CodeGroup>
+
+    This generates a `dist/` folder with optimized, minified assets ready for deployment.
+
+    Preview your production build locally:
+
+    <CodeGroup>
+      ```bash npm
+      npm run preview
+      ```
+
+      ```bash yarn
+      yarn preview
+      ```
+
+      ```bash pnpm
+      pnpm preview
+      ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## Next Steps
+
+Congratulations! You've created your first application. Here's what to explore next:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Components" icon="puzzle-piece" href="/components/introduction">
+    Learn about component patterns and best practices
+  </Card>
+  <Card title="Routing" icon="route" href="/concepts/routing">
+    Build multi-page applications with file-based routing
+  </Card>
+  <Card title="State Management" icon="database" href="/concepts/state-management">
+    Manage complex application state effectively
+  </Card>
+  <Card title="Styling" icon="paintbrush" href="/development/styling">
+    Explore different styling approaches and theming
+  </Card>
 </CardGroup>
 
+<Warning>
+  Remember to add environment variables to `.env.local` (not `.env`) to keep secrets out of version control.
+</Warning>
+
+## Common First Steps
+
+### Add a New Page
+
+Create a file in `src/pages/about.tsx`:
+
+```tsx src/pages/about.tsx
+export default function About() {
+  return (
+    <div>
+      <h1>About Us</h1>
+      <p>This page is automatically available at /about</p>
+    </div>
+  )
+}
+```
+
+### Fetch Data
+
+Use the built-in data fetching utilities:
+
+```tsx
+import { useEffect, useState } from 'react'
+
+export function UserList() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('https://api.example.com/users')
+      .then(res => res.json())
+      .then(data => {
+        setUsers(data)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Getting Help
+
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Stuck? Check out our [Installation Guide](/installation) for detailed troubleshooting or join our community Discord for real-time help.
 </Note>

@@ -1,0 +1,218 @@
+---
+title: 'Button'
+description: 'Versatile button component with multiple variants, sizes, and states'
+---
+
+## Overview
+
+The Button component is a foundational interactive element that triggers actions when clicked. It supports multiple visual styles, sizes, and states.
+
+## Basic Usage
+
+```typescript
+import { Button } from '@yourproject/components';
+
+function Example() {
+  return <Button>Click Me</Button>;
+}
+```
+
+## Variants
+
+The Button component supports multiple visual variants:
+
+<Tabs>
+  <Tab title="Primary">
+    ```typescript
+    <Button variant="primary">
+      Primary Action
+    </Button>
+    ```
+    The primary variant is used for main actions. It features a solid background with high contrast.
+  </Tab>
+  
+  <Tab title="Secondary">
+    ```typescript
+    <Button variant="secondary">
+      Secondary Action
+    </Button>
+    ```
+    The secondary variant is used for less prominent actions. It features an outlined style.
+  </Tab>
+  
+  <Tab title="Tertiary">
+    ```typescript
+    <Button variant="tertiary">
+      Tertiary Action
+    </Button>
+    ```
+    The tertiary variant is subtle, used for low-emphasis actions with minimal visual weight.
+  </Tab>
+  
+  <Tab title="Danger">
+    ```typescript
+    <Button variant="danger">
+      Delete Item
+    </Button>
+    ```
+    The danger variant is used for destructive actions like deletions, featuring red coloring.
+  </Tab>
+</Tabs>
+
+## Sizes
+
+Buttons come in four sizes to fit different use cases:
+
+```typescript
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+<Button size="xl">Extra Large</Button>
+```
+
+<Note>
+  The default size is `md` if not specified.
+</Note>
+
+## States
+
+### Disabled State
+
+```typescript
+<Button disabled>
+  Disabled Button
+</Button>
+```
+
+Disabled buttons cannot be interacted with and appear visually muted.
+
+### Loading State
+
+```typescript
+<Button loading>
+  Processing...
+</Button>
+```
+
+The loading state shows a spinner and prevents interaction while an async operation is in progress.
+
+### Full Width
+
+```typescript
+<Button fullWidth>
+  Full Width Button
+</Button>
+```
+
+## Props
+
+<ParamField path="variant" type="string" default="primary">
+  Visual style variant: `primary`, `secondary`, `tertiary`, or `danger`
+</ParamField>
+
+<ParamField path="size" type="string" default="md">
+  Button size: `sm`, `md`, `lg`, or `xl`
+</ParamField>
+
+<ParamField path="disabled" type="boolean" default="false">
+  Whether the button is disabled and cannot be interacted with
+</ParamField>
+
+<ParamField path="loading" type="boolean" default="false">
+  Shows a loading spinner and prevents interaction
+</ParamField>
+
+<ParamField path="fullWidth" type="boolean" default="false">
+  Makes the button expand to fill its container width
+</ParamField>
+
+<ParamField path="onClick" type="function">
+  Click event handler: `(event: React.MouseEvent) => void`
+</ParamField>
+
+<ParamField path="type" type="string" default="button">
+  HTML button type: `button`, `submit`, or `reset`
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  The content to display inside the button
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional CSS class names to apply
+</ParamField>
+
+<ParamField path="icon" type="ReactNode">
+  Optional icon to display before the button text
+</ParamField>
+
+## TypeScript Interface
+
+```typescript
+interface ButtonProps {
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'danger';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  type?: 'button' | 'submit' | 'reset';
+  children: React.ReactNode;
+  className?: string;
+  icon?: React.ReactNode;
+}
+```
+
+## Advanced Examples
+
+### Button with Icon
+
+```typescript
+import { Button } from '@yourproject/components';
+import { ChevronRight } from 'lucide-react';
+
+function Example() {
+  return (
+    <Button icon={<ChevronRight />}>
+      Continue
+    </Button>
+  );
+}
+```
+
+### Async Button
+
+```typescript
+import { Button } from '@yourproject/components';
+import { useState } from 'react';
+
+function Example() {
+  const [loading, setLoading] = useState(false);
+  
+  const handleClick = async () => {
+    setLoading(true);
+    await saveData();
+    setLoading(false);
+  };
+  
+  return (
+    <Button 
+      loading={loading} 
+      onClick={handleClick}
+    >
+      Save Changes
+    </Button>
+  );
+}
+```
+
+<Tip>
+  Use the `loading` prop with async operations to provide visual feedback to users.
+</Tip>
+
+## Accessibility
+
+- Supports keyboard navigation (Enter and Space keys)
+- Includes proper ARIA attributes when disabled or loading
+- Maintains focus management for keyboard users
+- Color contrast meets WCAG AA standards

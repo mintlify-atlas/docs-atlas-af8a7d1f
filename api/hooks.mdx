@@ -1,0 +1,569 @@
+---
+title: 'Custom Hooks'
+description: 'React hooks for common functionality including authentication, forms, data fetching, and local storage'
+icon: 'hook'
+---
+
+## useAuth
+
+Manages user authentication state and provides authentication methods.
+
+### Parameters
+
+<ParamField path="options" type="UseAuthOptions" required={false}>
+  Configuration options for the authentication hook
+  
+  <Expandable title="properties">
+    <ResponseField name="autoRefresh" type="boolean" default="true">
+      Automatically refresh tokens when they expire
+    </ResponseField>
+    
+    <ResponseField name="redirectOnLogout" type="string" default="/login">
+      URL to redirect to after logout
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+### Return Value
+
+<ResponseField name="user" type="User | null">
+  The currently authenticated user object, or null if not authenticated
+</ResponseField>
+
+<ResponseField name="isAuthenticated" type="boolean">
+  Whether a user is currently authenticated
+</ResponseField>
+
+<ResponseField name="isLoading" type="boolean">
+  Whether authentication state is being loaded
+</ResponseField>
+
+<ResponseField name="login" type="(credentials: LoginCredentials) => Promise<void>">
+  Function to log in a user with email and password
+</ResponseField>
+
+<ResponseField name="logout" type="() => Promise<void>">
+  Function to log out the current user
+</ResponseField>
+
+<ResponseField name="register" type="(data: RegisterData) => Promise<void>">
+  Function to register a new user
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+```tsx Basic Usage
+import { useAuth } from '@/hooks/useAuth';
+
+function ProfilePage() {
+  const { user, isAuthenticated, logout } = useAuth();
+
+  if (!isAuthenticated) {
+    return <div>Please log in</div>;
+  }
+
+  return (
+    <div>
+      <h1>Welcome, {user.name}</h1>
+      <button onClick={logout}>Logout</button>
+    </div>
+  );
+}
+```
+
+```tsx With Options
+import { useAuth } from '@/hooks/useAuth';
+
+function LoginPage() {
+  const { login, isLoading } = useAuth({
+    autoRefresh: false,
+    redirectOnLogout: '/'
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await login({ email, password });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields */}
+      <button disabled={isLoading}>Login</button>
+    </form>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## useForm
+
+Manages form state, validation, and submission with TypeScript support.
+
+### Parameters
+
+<ParamField path="initialValues" type="T" required={true}>
+  Initial form values object
+</ParamField>
+
+<ParamField path="options" type="UseFormOptions<T>" required={false}>
+  Form configuration options
+  
+  <Expandable title="properties">
+    <ResponseField name="validate" type="(values: T) => ValidationErrors<T>">
+      Validation function that returns error messages
+    </ResponseField>
+    
+    <ResponseField name="onSubmit" type="(values: T) => Promise<void> | void">
+      Form submission handler
+    </ResponseField>
+    
+    <ResponseField name="validateOnChange" type="boolean" default="false">
+      Run validation on every field change
+    </ResponseField>
+    
+    <ResponseField name="validateOnBlur" type="boolean" default="true">
+      Run validation when field loses focus
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+### Return Value
+
+<ResponseField name="values" type="T">
+  Current form values
+</ResponseField>
+
+<ResponseField name="errors" type="ValidationErrors<T>">
+  Validation errors for each field
+</ResponseField>
+
+<ResponseField name="touched" type="Record<keyof T, boolean>">
+  Which fields have been interacted with
+</ResponseField>
+
+<ResponseField name="isSubmitting" type="boolean">
+  Whether form is currently being submitted
+</ResponseField>
+
+<ResponseField name="handleChange" type="(field: keyof T, value: any) => void">
+  Update a field value
+</ResponseField>
+
+<ResponseField name="handleBlur" type="(field: keyof T) => void">
+  Mark a field as touched
+</ResponseField>
+
+<ResponseField name="handleSubmit" type="(e?: React.FormEvent) => Promise<void>">
+  Submit the form
+</ResponseField>
+
+<ResponseField name="resetForm" type="() => void">
+  Reset form to initial values
+</ResponseField>
+
+<ResponseField name="setFieldValue" type="(field: keyof T, value: any) => void">
+  Programmatically set a field value
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+```tsx Contact Form
+import { useForm } from '@/hooks/useForm';
+
+interface ContactForm {
+  name: string;
+  email: string;
+  message: string;
+}
+
+function ContactPage() {
+  const { values, errors, touched, handleChange, handleSubmit } = useForm<ContactForm>({
+    name: '',
+    email: '',
+    message: ''
+  }, {
+    validate: (values) => {
+      const errors: any = {};
+      if (!values.email.includes('@')) {
+        errors.email = 'Invalid email';
+      }
+      if (values.message.length < 10) {
+        errors.message = 'Message too short';
+      }
+      return errors;
+    },
+    onSubmit: async (values) => {
+      await fetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify(values)
+      });
+    }
+  });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={values.name}
+        onChange={(e) => handleChange('name', e.target.value)}
+      />
+      {touched.name && errors.name && <span>{errors.name}</span>}
+      {/* other fields */}
+    </form>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## useFetch
+
+Data fetching hook with loading, error states, and caching support.
+
+### Parameters
+
+<ParamField path="url" type="string" required={true}>
+  The URL to fetch data from
+</ParamField>
+
+<ParamField path="options" type="UseFetchOptions<T>" required={false}>
+  Fetch configuration options
+  
+  <Expandable title="properties">
+    <ResponseField name="method" type="'GET' | 'POST' | 'PUT' | 'DELETE'" default="'GET'">
+      HTTP method to use
+    </ResponseField>
+    
+    <ResponseField name="body" type="any">
+      Request body data
+    </ResponseField>
+    
+    <ResponseField name="headers" type="Record<string, string>">
+      Additional headers to send
+    </ResponseField>
+    
+    <ResponseField name="enabled" type="boolean" default="true">
+      Whether to automatically fetch on mount
+    </ResponseField>
+    
+    <ResponseField name="refetchInterval" type="number">
+      Interval in milliseconds to refetch data
+    </ResponseField>
+    
+    <ResponseField name="onSuccess" type="(data: T) => void">
+      Callback when fetch succeeds
+    </ResponseField>
+    
+    <ResponseField name="onError" type="(error: Error) => void">
+      Callback when fetch fails
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+### Return Value
+
+<ResponseField name="data" type="T | null">
+  The fetched data
+</ResponseField>
+
+<ResponseField name="error" type="Error | null">
+  Error object if the fetch failed
+</ResponseField>
+
+<ResponseField name="isLoading" type="boolean">
+  Whether data is currently being fetched
+</ResponseField>
+
+<ResponseField name="isValidating" type="boolean">
+  Whether data is being revalidated in the background
+</ResponseField>
+
+<ResponseField name="refetch" type="() => Promise<void>">
+  Manually trigger a refetch
+</ResponseField>
+
+<ResponseField name="mutate" type="(data: T) => void">
+  Manually update the cached data
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+```tsx Basic Fetch
+import { useFetch } from '@/hooks/useFetch';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+function UserProfile({ userId }: { userId: number }) {
+  const { data, error, isLoading } = useFetch<User>(
+    `/api/users/${userId}`
+  );
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!data) return null;
+
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.email}</p>
+    </div>
+  );
+}
+```
+
+```tsx With Options
+import { useFetch } from '@/hooks/useFetch';
+
+function Dashboard() {
+  const { data, refetch } = useFetch('/api/stats', {
+    refetchInterval: 30000, // Refetch every 30 seconds
+    onSuccess: (data) => {
+      console.log('Stats updated:', data);
+    },
+    onError: (error) => {
+      console.error('Failed to fetch stats:', error);
+    }
+  });
+
+  return (
+    <div>
+      <button onClick={refetch}>Refresh</button>
+      {/* render stats */}
+    </div>
+  );
+}
+```
+
+```tsx POST Request
+import { useFetch } from '@/hooks/useFetch';
+
+function CreatePost() {
+  const [title, setTitle] = useState('');
+  
+  const { data, isLoading, refetch } = useFetch('/api/posts', {
+    method: 'POST',
+    body: { title },
+    enabled: false // Don't fetch on mount
+  });
+
+  const handleSubmit = () => {
+    refetch(); // Manually trigger the POST request
+  };
+
+  return (
+    <div>
+      <input value={title} onChange={(e) => setTitle(e.target.value)} />
+      <button onClick={handleSubmit} disabled={isLoading}>
+        Create Post
+      </button>
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## useLocalStorage
+
+Persists state to localStorage with automatic synchronization across tabs.
+
+### Parameters
+
+<ParamField path="key" type="string" required={true}>
+  The localStorage key to store the value under
+</ParamField>
+
+<ParamField path="initialValue" type="T" required={true}>
+  Initial value if no stored value exists
+</ParamField>
+
+<ParamField path="options" type="UseLocalStorageOptions" required={false}>
+  Storage configuration options
+  
+  <Expandable title="properties">
+    <ResponseField name="serializer" type="(value: T) => string" default="JSON.stringify">
+      Custom serialization function
+    </ResponseField>
+    
+    <ResponseField name="deserializer" type="(value: string) => T" default="JSON.parse">
+      Custom deserialization function
+    </ResponseField>
+    
+    <ResponseField name="syncAcrossTabs" type="boolean" default="true">
+      Sync changes across browser tabs
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+### Return Value
+
+<ResponseField name="value" type="T">
+  The current stored value
+</ResponseField>
+
+<ResponseField name="setValue" type="(value: T | ((prev: T) => T)) => void">
+  Update the stored value
+</ResponseField>
+
+<ResponseField name="removeValue" type="() => void">
+  Remove the value from localStorage
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+```tsx Theme Preference
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+
+function ThemeToggle() {
+  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>(
+    'theme',
+    'light'
+  );
+
+  const toggleTheme = () => {
+    setTheme(current => current === 'light' ? 'dark' : 'light');
+  };
+
+  return (
+    <button onClick={toggleTheme}>
+      Current theme: {theme}
+    </button>
+  );
+}
+```
+
+```tsx Cart State
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+
+interface CartItem {
+  id: string;
+  quantity: number;
+}
+
+function ShoppingCart() {
+  const [cart, setCart, removeCart] = useLocalStorage<CartItem[]>(
+    'shopping-cart',
+    []
+  );
+
+  const addItem = (item: CartItem) => {
+    setCart(current => [...current, item]);
+  };
+
+  const clearCart = () => {
+    removeCart();
+  };
+
+  return (
+    <div>
+      <p>Items in cart: {cart.length}</p>
+      <button onClick={clearCart}>Clear Cart</button>
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## useDebounce
+
+Debounces a value, useful for search inputs and performance optimization.
+
+### Parameters
+
+<ParamField path="value" type="T" required={true}>
+  The value to debounce
+</ParamField>
+
+<ParamField path="delay" type="number" required={true}>
+  Delay in milliseconds before updating the debounced value
+</ParamField>
+
+### Return Value
+
+<ResponseField name="debouncedValue" type="T">
+  The debounced value that updates after the specified delay
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+```tsx Search Input
+import { useDebounce } from '@/hooks/useDebounce';
+import { useFetch } from '@/hooks/useFetch';
+
+function SearchUsers() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  
+  const { data, isLoading } = useFetch(
+    `/api/users/search?q=${debouncedSearch}`,
+    { enabled: debouncedSearch.length > 0 }
+  );
+
+  return (
+    <div>
+      <input
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search users..."
+      />
+      {isLoading && <span>Searching...</span>}
+      {/* render results */}
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## useMediaQuery
+
+Responds to CSS media query changes for responsive design.
+
+### Parameters
+
+<ParamField path="query" type="string" required={true}>
+  CSS media query string (e.g., '(min-width: 768px)')
+</ParamField>
+
+### Return Value
+
+<ResponseField name="matches" type="boolean">
+  Whether the media query currently matches
+</ResponseField>
+
+### Example
+
+<CodeGroup>
+```tsx Responsive Layout
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+function ResponsiveLayout() {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
+  const isDesktop = useMediaQuery('(min-width: 1025px)');
+
+  return (
+    <div>
+      {isMobile && <MobileNav />}
+      {isTablet && <TabletNav />}
+      {isDesktop && <DesktopNav />}
+    </div>
+  );
+}
+```
+</CodeGroup>

@@ -1,0 +1,635 @@
+---
+title: 'Constants'
+description: 'Application constants, configuration values, and enums used throughout the project'
+icon: 'code'
+---
+
+## API Constants
+
+### API_VERSION
+
+Current API version number.
+
+<ParamField path="API_VERSION" type="string">
+  Value: `"v1"`
+</ParamField>
+
+### API_BASE_URL
+
+Base URL for API endpoints.
+
+<ParamField path="API_BASE_URL" type="string">
+  Value: `process.env.NEXT_PUBLIC_API_URL || "https://api.example.com"`
+</ParamField>
+
+### API_TIMEOUT
+
+Default timeout for API requests in milliseconds.
+
+<ParamField path="API_TIMEOUT" type="number">
+  Value: `30000` (30 seconds)
+</ParamField>
+
+### HTTP_STATUS
+
+HTTP status code constants.
+
+<ResponseField name="HTTP_STATUS" type="object">
+  <Expandable title="properties">
+    <ResponseField name="OK" type="200">
+      Request succeeded
+    </ResponseField>
+    
+    <ResponseField name="CREATED" type="201">
+      Resource created successfully
+    </ResponseField>
+    
+    <ResponseField name="NO_CONTENT" type="204">
+      Request succeeded with no content to return
+    </ResponseField>
+    
+    <ResponseField name="BAD_REQUEST" type="400">
+      Invalid request
+    </ResponseField>
+    
+    <ResponseField name="UNAUTHORIZED" type="401">
+      Authentication required
+    </ResponseField>
+    
+    <ResponseField name="FORBIDDEN" type="403">
+      Access denied
+    </ResponseField>
+    
+    <ResponseField name="NOT_FOUND" type="404">
+      Resource not found
+    </ResponseField>
+    
+    <ResponseField name="INTERNAL_SERVER_ERROR" type="500">
+      Server error
+    </ResponseField>
+    
+    <ResponseField name="SERVICE_UNAVAILABLE" type="503">
+      Service temporarily unavailable
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { HTTP_STATUS } from '@/constants';
+
+if (response.status === HTTP_STATUS.OK) {
+  // Handle success
+} else if (response.status === HTTP_STATUS.UNAUTHORIZED) {
+  // Redirect to login
+}
+```
+</CodeGroup>
+
+---
+
+## Authentication Constants
+
+### AUTH_TOKEN_KEY
+
+LocalStorage key for authentication token.
+
+<ParamField path="AUTH_TOKEN_KEY" type="string">
+  Value: `"auth_token"`
+</ParamField>
+
+### REFRESH_TOKEN_KEY
+
+LocalStorage key for refresh token.
+
+<ParamField path="REFRESH_TOKEN_KEY" type="string">
+  Value: `"refresh_token"`
+</ParamField>
+
+### TOKEN_EXPIRY_KEY
+
+LocalStorage key for token expiry timestamp.
+
+<ParamField path="TOKEN_EXPIRY_KEY" type="string">
+  Value: `"token_expiry"`
+</ParamField>
+
+### SESSION_TIMEOUT
+
+Session timeout duration in milliseconds.
+
+<ParamField path="SESSION_TIMEOUT" type="number">
+  Value: `3600000` (1 hour)
+</ParamField>
+
+### REFRESH_THRESHOLD
+
+Time before expiry to refresh token (milliseconds).
+
+<ParamField path="REFRESH_THRESHOLD" type="number">
+  Value: `300000` (5 minutes)
+</ParamField>
+
+---
+
+## Route Constants
+
+### ROUTES
+
+Application route paths.
+
+<ResponseField name="ROUTES" type="object">
+  <Expandable title="properties">
+    <ResponseField name="HOME" type="string">
+      Value: `"/"`
+    </ResponseField>
+    
+    <ResponseField name="LOGIN" type="string">
+      Value: `"/login"`
+    </ResponseField>
+    
+    <ResponseField name="REGISTER" type="string">
+      Value: `"/register"`
+    </ResponseField>
+    
+    <ResponseField name="DASHBOARD" type="string">
+      Value: `"/dashboard"`
+    </ResponseField>
+    
+    <ResponseField name="PROFILE" type="string">
+      Value: `"/profile"`
+    </ResponseField>
+    
+    <ResponseField name="SETTINGS" type="string">
+      Value: `"/settings"`
+    </ResponseField>
+    
+    <ResponseField name="NOT_FOUND" type="string">
+      Value: `"/404"`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { ROUTES } from '@/constants';
+import { useRouter } from 'next/router';
+
+function LoginButton() {
+  const router = useRouter();
+  
+  const handleLogin = () => {
+    router.push(ROUTES.LOGIN);
+  };
+  
+  return <button onClick={handleLogin}>Login</button>;
+}
+```
+</CodeGroup>
+
+---
+
+## UI Constants
+
+### BREAKPOINTS
+
+Responsive design breakpoints in pixels.
+
+<ResponseField name="BREAKPOINTS" type="object">
+  <Expandable title="properties">
+    <ResponseField name="XS" type="320">
+      Extra small devices
+    </ResponseField>
+    
+    <ResponseField name="SM" type="640">
+      Small devices (phones)
+    </ResponseField>
+    
+    <ResponseField name="MD" type="768">
+      Medium devices (tablets)
+    </ResponseField>
+    
+    <ResponseField name="LG" type="1024">
+      Large devices (desktops)
+    </ResponseField>
+    
+    <ResponseField name="XL" type="1280">
+      Extra large devices
+    </ResponseField>
+    
+    <ResponseField name="XXL" type="1536">
+      Extra extra large devices
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### THEME_COLORS
+
+Application color palette.
+
+<ResponseField name="THEME_COLORS" type="object">
+  <Expandable title="properties">
+    <ResponseField name="PRIMARY" type="string">
+      Value: `"#3B82F6"`
+    </ResponseField>
+    
+    <ResponseField name="SECONDARY" type="string">
+      Value: `"#10B981"`
+    </ResponseField>
+    
+    <ResponseField name="ACCENT" type="string">
+      Value: `"#F59E0B"`
+    </ResponseField>
+    
+    <ResponseField name="ERROR" type="string">
+      Value: `"#EF4444"`
+    </ResponseField>
+    
+    <ResponseField name="WARNING" type="string">
+      Value: `"#F59E0B"`
+    </ResponseField>
+    
+    <ResponseField name="SUCCESS" type="string">
+      Value: `"#10B981"`
+    </ResponseField>
+    
+    <ResponseField name="INFO" type="string">
+      Value: `"#3B82F6"`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Z_INDEX
+
+Z-index layering constants.
+
+<ResponseField name="Z_INDEX" type="object">
+  <Expandable title="properties">
+    <ResponseField name="DROPDOWN" type="1000">
+      Dropdown menus
+    </ResponseField>
+    
+    <ResponseField name="MODAL" type="2000">
+      Modal overlays
+    </ResponseField>
+    
+    <ResponseField name="TOOLTIP" type="3000">
+      Tooltips
+    </ResponseField>
+    
+    <ResponseField name="NOTIFICATION" type="4000">
+      Toast notifications
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { BREAKPOINTS, THEME_COLORS, Z_INDEX } from '@/constants';
+import styled from 'styled-components';
+
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: ${Z_INDEX.MODAL};
+  background-color: ${THEME_COLORS.PRIMARY};
+  
+  @media (min-width: ${BREAKPOINTS.MD}px) {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+`;
+```
+</CodeGroup>
+
+---
+
+## Validation Constants
+
+### VALIDATION_RULES
+
+Common validation rules and limits.
+
+<ResponseField name="VALIDATION_RULES" type="object">
+  <Expandable title="properties">
+    <ResponseField name="EMAIL_MAX_LENGTH" type="254">
+      Maximum email address length
+    </ResponseField>
+    
+    <ResponseField name="PASSWORD_MIN_LENGTH" type="8">
+      Minimum password length
+    </ResponseField>
+    
+    <ResponseField name="PASSWORD_MAX_LENGTH" type="128">
+      Maximum password length
+    </ResponseField>
+    
+    <ResponseField name="USERNAME_MIN_LENGTH" type="3">
+      Minimum username length
+    </ResponseField>
+    
+    <ResponseField name="USERNAME_MAX_LENGTH" type="30">
+      Maximum username length
+    </ResponseField>
+    
+    <ResponseField name="BIO_MAX_LENGTH" type="500">
+      Maximum bio/description length
+    </ResponseField>
+    
+    <ResponseField name="PHONE_MIN_LENGTH" type="10">
+      Minimum phone number length
+    </ResponseField>
+    
+    <ResponseField name="PHONE_MAX_LENGTH" type="15">
+      Maximum phone number length
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### REGEX_PATTERNS
+
+Common regular expression patterns.
+
+<ResponseField name="REGEX_PATTERNS" type="object">
+  <Expandable title="properties">
+    <ResponseField name="EMAIL" type="RegExp">
+      Email validation pattern
+    </ResponseField>
+    
+    <ResponseField name="URL" type="RegExp">
+      URL validation pattern
+    </ResponseField>
+    
+    <ResponseField name="PHONE" type="RegExp">
+      Phone number pattern (US)
+    </ResponseField>
+    
+    <ResponseField name="USERNAME" type="RegExp">
+      Username pattern (alphanumeric and underscore)
+    </ResponseField>
+    
+    <ResponseField name="HEX_COLOR" type="RegExp">
+      Hexadecimal color code pattern
+    </ResponseField>
+    
+    <ResponseField name="ALPHANUMERIC" type="RegExp">
+      Alphanumeric characters only
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { VALIDATION_RULES, REGEX_PATTERNS } from '@/constants';
+
+function validateUsername(username: string): boolean {
+  return (
+    username.length >= VALIDATION_RULES.USERNAME_MIN_LENGTH &&
+    username.length <= VALIDATION_RULES.USERNAME_MAX_LENGTH &&
+    REGEX_PATTERNS.USERNAME.test(username)
+  );
+}
+
+function validateEmail(email: string): boolean {
+  return (
+    email.length <= VALIDATION_RULES.EMAIL_MAX_LENGTH &&
+    REGEX_PATTERNS.EMAIL.test(email)
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## Pagination Constants
+
+### DEFAULT_PAGE_SIZE
+
+Default number of items per page.
+
+<ParamField path="DEFAULT_PAGE_SIZE" type="number">
+  Value: `20`
+</ParamField>
+
+### MAX_PAGE_SIZE
+
+Maximum allowed items per page.
+
+<ParamField path="MAX_PAGE_SIZE" type="number">
+  Value: `100`
+</ParamField>
+
+### PAGE_SIZE_OPTIONS
+
+Available page size options for user selection.
+
+<ParamField path="PAGE_SIZE_OPTIONS" type="number[]">
+  Value: `[10, 20, 50, 100]`
+</ParamField>
+
+---
+
+## File Upload Constants
+
+### MAX_FILE_SIZE
+
+Maximum file upload size in bytes.
+
+<ParamField path="MAX_FILE_SIZE" type="number">
+  Value: `5242880` (5 MB)
+</ParamField>
+
+### ALLOWED_FILE_TYPES
+
+Allowed file MIME types for upload.
+
+<ResponseField name="ALLOWED_FILE_TYPES" type="object">
+  <Expandable title="properties">
+    <ResponseField name="IMAGES" type="string[]">
+      Value: `['image/jpeg', 'image/png', 'image/gif', 'image/webp']`
+    </ResponseField>
+    
+    <ResponseField name="DOCUMENTS" type="string[]">
+      Value: `['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']`
+    </ResponseField>
+    
+    <ResponseField name="SPREADSHEETS" type="string[]">
+      Value: `['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { MAX_FILE_SIZE, ALLOWED_FILE_TYPES } from '@/constants';
+
+function validateFile(file: File): { valid: boolean; error?: string } {
+  if (file.size > MAX_FILE_SIZE) {
+    return { valid: false, error: 'File too large (max 5MB)' };
+  }
+  
+  const allAllowedTypes = [
+    ...ALLOWED_FILE_TYPES.IMAGES,
+    ...ALLOWED_FILE_TYPES.DOCUMENTS
+  ];
+  
+  if (!allAllowedTypes.includes(file.type)) {
+    return { valid: false, error: 'File type not allowed' };
+  }
+  
+  return { valid: true };
+}
+```
+</CodeGroup>
+
+---
+
+## Date & Time Constants
+
+### DATE_FORMATS
+
+Common date format strings.
+
+<ResponseField name="DATE_FORMATS" type="object">
+  <Expandable title="properties">
+    <ResponseField name="SHORT" type="string">
+      Value: `"MM/DD/YYYY"`
+    </ResponseField>
+    
+    <ResponseField name="LONG" type="string">
+      Value: `"MMMM DD, YYYY"`
+    </ResponseField>
+    
+    <ResponseField name="ISO" type="string">
+      Value: `"YYYY-MM-DD"`
+    </ResponseField>
+    
+    <ResponseField name="FULL" type="string">
+      Value: `"dddd, MMMM DD, YYYY"`
+    </ResponseField>
+    
+    <ResponseField name="TIME_12H" type="string">
+      Value: `"hh:mm A"`
+    </ResponseField>
+    
+    <ResponseField name="TIME_24H" type="string">
+      Value: `"HH:mm"`
+    </ResponseField>
+    
+    <ResponseField name="DATETIME" type="string">
+      Value: `"MM/DD/YYYY hh:mm A"`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### TIME_ZONES
+
+Common time zone identifiers.
+
+<ResponseField name="TIME_ZONES" type="object">
+  <Expandable title="properties">
+    <ResponseField name="EST" type="string">
+      Value: `"America/New_York"`
+    </ResponseField>
+    
+    <ResponseField name="PST" type="string">
+      Value: `"America/Los_Angeles"`
+    </ResponseField>
+    
+    <ResponseField name="UTC" type="string">
+      Value: `"UTC"`
+    </ResponseField>
+    
+    <ResponseField name="GMT" type="string">
+      Value: `"Europe/London"`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Error Messages
+
+### ERROR_MESSAGES
+
+Standardized error messages.
+
+<ResponseField name="ERROR_MESSAGES" type="object">
+  <Expandable title="properties">
+    <ResponseField name="REQUIRED_FIELD" type="string">
+      Value: `"This field is required"`
+    </ResponseField>
+    
+    <ResponseField name="INVALID_EMAIL" type="string">
+      Value: `"Please enter a valid email address"`
+    </ResponseField>
+    
+    <ResponseField name="INVALID_PASSWORD" type="string">
+      Value: `"Password must be at least 8 characters"`
+    </ResponseField>
+    
+    <ResponseField name="PASSWORDS_DONT_MATCH" type="string">
+      Value: `"Passwords do not match"`
+    </ResponseField>
+    
+    <ResponseField name="NETWORK_ERROR" type="string">
+      Value: `"Network error. Please try again."`
+    </ResponseField>
+    
+    <ResponseField name="UNAUTHORIZED" type="string">
+      Value: `"You are not authorized to perform this action"`
+    </ResponseField>
+    
+    <ResponseField name="NOT_FOUND" type="string">
+      Value: `"The requested resource was not found"`
+    </ResponseField>
+    
+    <ResponseField name="SERVER_ERROR" type="string">
+      Value: `"An unexpected error occurred. Please try again later."`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { ERROR_MESSAGES } from '@/constants';
+
+function LoginForm() {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  const validate = (email: string, password: string) => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!email) {
+      newErrors.email = ERROR_MESSAGES.REQUIRED_FIELD;
+    } else if (!email.includes('@')) {
+      newErrors.email = ERROR_MESSAGES.INVALID_EMAIL;
+    }
+    
+    if (!password) {
+      newErrors.password = ERROR_MESSAGES.REQUIRED_FIELD;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  // ...
+}
+```
+</CodeGroup>

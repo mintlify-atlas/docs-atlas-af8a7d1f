@@ -1,0 +1,284 @@
+---
+title: 'Card'
+description: 'Flexible card component for grouping and organizing content'
+---
+
+## Overview
+
+The Card component is a versatile container for grouping related content. It provides a clean, elevated surface with consistent padding and styling.
+
+## Basic Usage
+
+```typescript
+import { Card } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Card>
+      <h3>Card Title</h3>
+      <p>Card content goes here.</p>
+    </Card>
+  );
+}
+```
+
+## Variants
+
+<Tabs>
+  <Tab title="Default">
+    ```typescript
+    <Card>
+      Standard card with default elevation and padding.
+    </Card>
+    ```
+  </Tab>
+  
+  <Tab title="Outlined">
+    ```typescript
+    <Card variant="outlined">
+      Card with border instead of shadow.
+    </Card>
+    ```
+  </Tab>
+  
+  <Tab title="Elevated">
+    ```typescript
+    <Card variant="elevated">
+      Card with enhanced shadow for more prominence.
+    </Card>
+    ```
+  </Tab>
+  
+  <Tab title="Flat">
+    ```typescript
+    <Card variant="flat">
+      Card with no shadow or border, minimal styling.
+    </Card>
+    ```
+  </Tab>
+</Tabs>
+
+## Card Structure
+
+### With Header and Footer
+
+```typescript
+import { Card, CardHeader, CardContent, CardFooter } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Card>
+      <CardHeader>
+        <h3>Card Title</h3>
+        <p>Subtitle or description</p>
+      </CardHeader>
+      
+      <CardContent>
+        Main content of the card goes here.
+      </CardContent>
+      
+      <CardFooter>
+        <Button>Action</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+## Interactive Cards
+
+### Hoverable Card
+
+```typescript
+<Card hoverable>
+  Hover over this card to see the elevation effect.
+</Card>
+```
+
+### Clickable Card
+
+```typescript
+<Card 
+  clickable
+  onClick={() => console.log('Card clicked')}
+>
+  Click this entire card.
+</Card>
+```
+
+## Padding Options
+
+```typescript
+<Card padding="none">No padding</Card>
+<Card padding="sm">Small padding</Card>
+<Card padding="md">Medium padding (default)</Card>
+<Card padding="lg">Large padding</Card>
+```
+
+## Props
+
+### Card Props
+
+<ParamField path="variant" type="string" default="default">
+  Visual style: `default`, `outlined`, `elevated`, or `flat`
+</ParamField>
+
+<ParamField path="padding" type="string" default="md">
+  Internal padding: `none`, `sm`, `md`, or `lg`
+</ParamField>
+
+<ParamField path="hoverable" type="boolean" default="false">
+  Whether to show elevation effect on hover
+</ParamField>
+
+<ParamField path="clickable" type="boolean" default="false">
+  Makes the entire card clickable with hover effects
+</ParamField>
+
+<ParamField path="onClick" type="function">
+  Click handler when card is clickable: `() => void`
+</ParamField>
+
+<ParamField path="children" type="ReactNode" required>
+  The content to display inside the card
+</ParamField>
+
+<ParamField path="className" type="string">
+  Additional CSS class names to apply
+</ParamField>
+
+### CardHeader Props
+
+<ParamField path="children" type="ReactNode" required>
+  Header content (typically title and subtitle)
+</ParamField>
+
+<ParamField path="action" type="ReactNode">
+  Action element to display in the header (e.g., icon button)
+</ParamField>
+
+### CardContent Props
+
+<ParamField path="children" type="ReactNode" required>
+  Main card content
+</ParamField>
+
+### CardFooter Props
+
+<ParamField path="children" type="ReactNode" required>
+  Footer content (typically actions or metadata)
+</ParamField>
+
+<ParamField path="align" type="string" default="right">
+  Alignment of footer content: `left`, `center`, or `right`
+</ParamField>
+
+## TypeScript Interfaces
+
+```typescript
+interface CardProps {
+  variant?: 'default' | 'outlined' | 'elevated' | 'flat';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  hoverable?: boolean;
+  clickable?: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface CardHeaderProps {
+  children: React.ReactNode;
+  action?: React.ReactNode;
+  className?: string;
+}
+
+interface CardContentProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface CardFooterProps {
+  children: React.ReactNode;
+  align?: 'left' | 'center' | 'right';
+  className?: string;
+}
+```
+
+## Layout Examples
+
+### Card Grid
+
+```typescript
+import { Card, Grid } from '@yourproject/components';
+
+function Example() {
+  return (
+    <Grid cols={3} gap="md">
+      <Card>
+        <CardHeader>
+          <h3>Feature 1</h3>
+        </CardHeader>
+        <CardContent>
+          Description of feature 1.
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <h3>Feature 2</h3>
+        </CardHeader>
+        <CardContent>
+          Description of feature 2.
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <h3>Feature 3</h3>
+        </CardHeader>
+        <CardContent>
+          Description of feature 3.
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+}
+```
+
+### Profile Card
+
+```typescript
+import { Card, CardHeader, CardContent, CardFooter, Button } from '@yourproject/components';
+
+function ProfileCard() {
+  return (
+    <Card variant="elevated">
+      <CardHeader>
+        <img src="avatar.jpg" alt="Profile" />
+        <h3>John Doe</h3>
+        <p>Software Engineer</p>
+      </CardHeader>
+      
+      <CardContent>
+        <p>Bio: Passionate about building great user experiences.</p>
+      </CardContent>
+      
+      <CardFooter align="center">
+        <Button variant="primary">Follow</Button>
+        <Button variant="secondary">Message</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+<Tip>
+  Use the `hoverable` prop for cards in a grid to provide visual feedback on interaction.
+</Tip>
+
+## Accessibility
+
+- Uses semantic HTML with proper heading hierarchy
+- Clickable cards include proper role and keyboard support
+- Maintains focus indicators for keyboard navigation
+- Screen reader compatible with descriptive content

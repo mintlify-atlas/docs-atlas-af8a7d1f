@@ -1,0 +1,579 @@
+---
+title: 'Testing'
+description: 'Comprehensive guide to testing strategies, unit tests, integration tests, and E2E testing'
+icon: 'flask-vial'
+---
+
+## Testing Philosophy
+
+We follow a comprehensive testing strategy that balances coverage with development speed:
+
+- **Unit Tests** - Test individual functions and components in isolation
+- **Integration Tests** - Test how components work together
+- **End-to-End Tests** - Test complete user flows in a real browser
+
+<Tip>
+Follow the testing pyramid: Many unit tests, fewer integration tests, and selective E2E tests for critical paths.
+</Tip>
+
+## Testing Stack
+
+Our testing infrastructure uses modern, industry-standard tools:
+
+- **Vitest** - Fast unit test runner
+- **React Testing Library** - Component testing utilities
+- **Playwright** - End-to-end testing framework
+- **MSW (Mock Service Worker)** - API mocking
+
+## Unit Testing
+
+### Setup
+
+Vitest configuration in `vitest.config.ts`:
+
+```typescript
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.config.ts',
+        '**/*.d.ts'
+      ]
+    }
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  }
+})
+```
+
+### Test Setup File
+
+Configure test environment in `src/test/setup.ts`:
+
+```typescript
+import '@testing-library/jest-dom'
+import { cleanup } from '@testing-library/react'
+import { afterEach, vi } from 'vitest'
+
+// Cleanup after each test
+afterEach(() => {
+  cleanup()
+})
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+})
+```
+
+### Testing Components
+
+<Steps>
+  <Step title="Basic Component Test">
+    Test component rendering and basic interactions:
+    
+    ```typescript
+    // Button.test.tsx
+    import { render, screen } from '@testing-library/react'
+    import userEvent from '@testing-library/user-event'
+    import { describe, it, expect, vi } from 'vitest'
+    import { Button } from './Button'
+    
+    describe('Button', () => {
+      it('renders button with text', () => {
+        render(<Button>Click me</Button>)
+        expect(screen.getByRole('button', { name: /click me/i })).toBeInTheDocument()
+      })
+      
+      it('calls onClick when clicked', async () => {
+        const handleClick = vi.fn()
+        const user = userEvent.setup()
+        
+        render(<Button onClick={handleClick}>Click me</Button>)
+        await user.click(screen.getByRole('button'))
+        
+        expect(handleClick).toHaveBeenCalledTimes(1)
+      })
+      
+      it('is disabled when disabled prop is true', () => {
+        render(<Button disabled>Click me</Button>)
+        expect(screen.getByRole('button')).toBeDisabled()
+      })
+    })
+    ```
+  </Step>
+  
+  <Step title="Testing with Props">
+    Test different prop combinations:
+    
+    ```typescript
+    // Card.test.tsx
+    import { render, screen } from '@testing-library/react'
+    import { describe, it, expect } from 'vitest'
+    import { Card } from './Card'
+    
+    describe('Card', () => {
+      it('renders title and description', () => {
+        render(
+          <Card title="Test Title" description="Test Description" />
+        )
+        
+        expect(screen.getByText('Test Title')).toBeInTheDocument()
+        expect(screen.getByText('Test Description')).toBeInTheDocument()
+      })
+      
+      it('renders with variant styles', () => {
+        const { container } = render(
+          <Card title="Test" variant="outlined" />
+        )
+        
+        expect(container.firstChild).toHaveClass('border')
+      })
+    })
+    ```
+  </Step>
+  
+  <Step title="Testing Hooks">
+    Test custom React hooks:
+    
+    ```typescript
+    // useCounter.test.ts
+    import { renderHook, act } from '@testing-library/react'
+    import { describe, it, expect } from 'vitest'
+    import { useCounter } from './useCounter'
+    
+    describe('useCounter', () => {
+      it('initializes with default value', () => {
+        const { result } = renderHook(() => useCounter())
+        expect(result.current.count).toBe(0)
+      })
+      
+      it('increments counter', () => {
+        const { result } = renderHook(() => useCounter())
+        
+        act(() => {
+          result.current.increment()
+        })
+        
+        expect(result.current.count).toBe(1)
+      })
+      
+      it('resets counter', () => {
+        const { result } = renderHook(() => useCounter(10))
+        
+        act(() => {
+          result.current.increment()
+          result.current.reset()
+        })
+        
+        expect(result.current.count).toBe(10)
+      })
+    })
+    ```
+  </Step>
+</Steps>
+
+### Testing Utilities
+
+Create reusable test utilities in `src/test/utils.tsx`:
+
+```typescript
+import { ReactElement } from 'react'
+import { render, RenderOptions } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter } from 'react-router-dom'
+
+// Create a custom render function with providers
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        {children}
+      </BrowserRouter>
+    </QueryClientProvider>
+  )
+}
+
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => render(ui, { wrapper: AllTheProviders, ...options })
+
+export * from '@testing-library/react'
+export { customRender as render }
+```
+
+## Integration Testing
+
+### API Mocking with MSW
+
+Set up Mock Service Worker for API mocking:
+
+```typescript
+// src/test/mocks/handlers.ts
+import { http, HttpResponse } from 'msw'
+
+export const handlers = [
+  // Mock GET request
+  http.get('/api/users/:id', ({ params }) => {
+    const { id } = params
+    return HttpResponse.json({
+      id,
+      name: 'John Doe',
+      email: 'john@example.com'
+    })
+  }),
+  
+  // Mock POST request
+  http.post('/api/users', async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json(
+      { id: '123', ...body },
+      { status: 201 }
+    )
+  }),
+  
+  // Mock error response
+  http.get('/api/error', () => {
+    return HttpResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    )
+  }),
+]
+```
+
+```typescript
+// src/test/mocks/server.ts
+import { setupServer } from 'msw/node'
+import { handlers } from './handlers'
+
+export const server = setupServer(...handlers)
+```
+
+Configure MSW in test setup:
+
+```typescript
+// src/test/setup.ts
+import { beforeAll, afterEach, afterAll } from 'vitest'
+import { server } from './mocks/server'
+
+// Start server before all tests
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+
+// Reset handlers after each test
+afterEach(() => server.resetHandlers())
+
+// Clean up after all tests
+afterAll(() => server.close())
+```
+
+### Testing API Integration
+
+```typescript
+// UserProfile.test.tsx
+import { render, screen, waitFor } from '@/test/utils'
+import { describe, it, expect } from 'vitest'
+import { server } from '@/test/mocks/server'
+import { http, HttpResponse } from 'msw'
+import { UserProfile } from './UserProfile'
+
+describe('UserProfile', () => {
+  it('loads and displays user data', async () => {
+    render(<UserProfile userId="1" />)
+    
+    expect(screen.getByText(/loading/i)).toBeInTheDocument()
+    
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('john@example.com')).toBeInTheDocument()
+    })
+  })
+  
+  it('displays error message on failure', async () => {
+    // Override default handler for this test
+    server.use(
+      http.get('/api/users/:id', () => {
+        return HttpResponse.json(
+          { message: 'User not found' },
+          { status: 404 }
+        )
+      })
+    )
+    
+    render(<UserProfile userId="999" />)
+    
+    await waitFor(() => {
+      expect(screen.getByText(/user not found/i)).toBeInTheDocument()
+    })
+  })
+})
+```
+
+## End-to-End Testing
+
+### Playwright Setup
+
+Configure Playwright in `playwright.config.ts`:
+
+```typescript
+import { defineConfig, devices } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+  },
+})
+```
+
+### Writing E2E Tests
+
+<CodeGroup>
+```typescript Basic E2E Test
+// e2e/login.spec.ts
+import { test, expect } from '@playwright/test'
+
+test('user can log in', async ({ page }) => {
+  await page.goto('/login')
+  
+  await page.fill('input[name="email"]', 'user@example.com')
+  await page.fill('input[name="password"]', 'password123')
+  await page.click('button[type="submit"]')
+  
+  await expect(page).toHaveURL('/dashboard')
+  await expect(page.getByText('Welcome back')).toBeVisible()
+})
+```
+
+```typescript Page Object Model
+// e2e/pages/LoginPage.ts
+import { Page } from '@playwright/test'
+
+export class LoginPage {
+  constructor(private page: Page) {}
+  
+  async goto() {
+    await this.page.goto('/login')
+  }
+  
+  async login(email: string, password: string) {
+    await this.page.fill('input[name="email"]', email)
+    await this.page.fill('input[name="password"]', password)
+    await this.page.click('button[type="submit"]')
+  }
+  
+  async getErrorMessage() {
+    return this.page.textContent('[role="alert"]')
+  }
+}
+
+// e2e/login.spec.ts
+import { test, expect } from '@playwright/test'
+import { LoginPage } from './pages/LoginPage'
+
+test('user can log in', async ({ page }) => {
+  const loginPage = new LoginPage(page)
+  await loginPage.goto()
+  await loginPage.login('user@example.com', 'password123')
+  
+  await expect(page).toHaveURL('/dashboard')
+})
+```
+</CodeGroup>
+
+### Advanced E2E Patterns
+
+<Accordion title="Authentication State">
+  Reuse authentication state across tests:
+  
+  ```typescript
+  // e2e/auth.setup.ts
+  import { test as setup } from '@playwright/test'
+  
+  const authFile = 'playwright/.auth/user.json'
+  
+  setup('authenticate', async ({ page }) => {
+    await page.goto('/login')
+    await page.fill('input[name="email"]', 'user@example.com')
+    await page.fill('input[name="password"]', 'password123')
+    await page.click('button[type="submit"]')
+    
+    await page.waitForURL('/dashboard')
+    await page.context().storageState({ path: authFile })
+  })
+  
+  // Use in tests
+  test.use({ storageState: authFile })
+  ```
+</Accordion>
+
+<Accordion title="API Mocking in E2E">
+  Mock API responses in E2E tests:
+  
+  ```typescript
+  test('displays mocked user data', async ({ page }) => {
+    await page.route('/api/users/*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: '1',
+          name: 'Test User',
+          email: 'test@example.com'
+        })
+      })
+    })
+    
+    await page.goto('/profile')
+    await expect(page.getByText('Test User')).toBeVisible()
+  })
+  ```
+</Accordion>
+
+## Running Tests
+
+<CodeGroup>
+```bash Unit Tests
+# Run all unit tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm run test Button.test.tsx
+```
+
+```bash E2E Tests
+# Run all E2E tests
+npm run test:e2e
+
+# Run E2E tests in UI mode
+npm run test:e2e:ui
+
+# Run specific test file
+npm run test:e2e login.spec.ts
+
+# Run on specific browser
+npm run test:e2e -- --project=chromium
+```
+</CodeGroup>
+
+## Test Coverage
+
+Maintain high test coverage for critical code:
+
+```bash
+npm run test:coverage
+```
+
+**Coverage Goals:**
+- Statements: > 80%
+- Branches: > 75%
+- Functions: > 80%
+- Lines: > 80%
+
+<Warning>
+Don't obsess over 100% coverage. Focus on testing critical paths and complex logic.
+</Warning>
+
+## Best Practices
+
+### Do's
+
+- Write tests alongside your code
+- Test user behavior, not implementation details
+- Use descriptive test names
+- Keep tests isolated and independent
+- Mock external dependencies
+- Test error states and edge cases
+
+### Don'ts
+
+- Don't test third-party libraries
+- Don't test implementation details (CSS classes, state)
+- Don't write flaky tests
+- Don't skip tests without good reason
+- Don't have test dependencies on each other
+
+### Testing Accessibility
+
+```typescript
+import { render } from '@testing-library/react'
+import { axe, toHaveNoViolations } from 'jest-axe'
+import { Button } from './Button'
+
+expect.extend(toHaveNoViolations)
+
+test('Button has no accessibility violations', async () => {
+  const { container } = render(<Button>Click me</Button>)
+  const results = await axe(container)
+  expect(results).toHaveNoViolations()
+})
+```
+
+<Tip>
+Include accessibility testing in your component tests to catch a11y issues early.
+</Tip>

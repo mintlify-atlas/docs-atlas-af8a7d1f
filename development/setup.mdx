@@ -1,0 +1,301 @@
+---
+title: 'Development Setup'
+description: 'Set up your development environment with the right tools and configuration'
+icon: 'laptop-code'
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+<Steps>
+  <Step title="Install Node.js">
+    Download and install Node.js (v18 or higher) from [nodejs.org](https://nodejs.org)
+    
+    ```bash
+    node --version
+    npm --version
+    ```
+  </Step>
+  
+  <Step title="Install Git">
+    Install Git for version control from [git-scm.com](https://git-scm.com)
+    
+    ```bash
+    git --version
+    ```
+  </Step>
+  
+  <Step title="Clone the Repository">
+    Clone the project repository to your local machine
+    
+    ```bash
+    git clone <repository-url>
+    cd <project-name>
+    ```
+  </Step>
+  
+  <Step title="Install Dependencies">
+    Install project dependencies using your preferred package manager
+    
+    <CodeGroup>
+    ```bash npm
+    npm install
+    ```
+    
+    ```bash yarn
+    yarn install
+    ```
+    
+    ```bash pnpm
+    pnpm install
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## IDE Configuration
+
+### Visual Studio Code
+
+VS Code is the recommended IDE for this project. Install the following extensions:
+
+#### Required Extensions
+
+- **ESLint** - Integrates ESLint JavaScript linting
+- **Prettier** - Code formatter
+- **TypeScript and JavaScript Language Features** - Enhanced TypeScript support
+
+#### Recommended Extensions
+
+- **Tailwind CSS IntelliSense** - Autocomplete for Tailwind classes
+- **Auto Rename Tag** - Automatically rename paired HTML/JSX tags
+- **GitLens** - Enhanced Git capabilities
+- **Error Lens** - Inline error highlighting
+- **Path Intellisense** - Autocomplete for file paths
+
+### Workspace Settings
+
+Create a `.vscode/settings.json` file in your project root:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ]
+}
+```
+
+<Tip>
+Commit the `.vscode` folder to your repository to ensure consistent settings across your team.
+</Tip>
+
+## Environment Variables
+
+Set up your environment variables for local development:
+
+<Steps>
+  <Step title="Copy Environment Template">
+    ```bash
+    cp .env.example .env.local
+    ```
+  </Step>
+  
+  <Step title="Configure Variables">
+    Edit `.env.local` with your local configuration:
+    
+    ```bash
+    # API Configuration
+    NEXT_PUBLIC_API_URL=http://localhost:3000/api
+    NEXT_PUBLIC_APP_URL=http://localhost:3000
+    
+    # Authentication
+    NEXTAUTH_URL=http://localhost:3000
+    NEXTAUTH_SECRET=your-secret-key-here
+    
+    # Database
+    DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+    
+    # Feature Flags
+    NEXT_PUBLIC_FEATURE_ANALYTICS=true
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+Never commit `.env.local` or any file containing secrets to version control. Ensure these files are listed in `.gitignore`.
+</Warning>
+
+## Development Tools
+
+### Package Manager
+
+This project uses **npm** as the default package manager. Use the same package manager across your team to avoid lock file conflicts.
+
+### Code Quality Tools
+
+#### ESLint
+
+Linting configuration is defined in `.eslintrc.js`:
+
+```javascript
+module.exports = {
+  extends: [
+    'next/core-web-vitals',
+    'plugin:@typescript-eslint/recommended',
+    'prettier'
+  ],
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'prefer-const': 'error'
+  }
+}
+```
+
+#### Prettier
+
+Formatting configuration in `.prettierrc`:
+
+```json
+{
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "printWidth": 80,
+  "arrowParens": "avoid"
+}
+```
+
+#### Husky & Lint-Staged
+
+Pre-commit hooks ensure code quality:
+
+```json
+// package.json
+{
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,mdx}": [
+      "prettier --write"
+    ]
+  }
+}
+```
+
+## Browser DevTools
+
+### React Developer Tools
+
+Install the React DevTools browser extension for debugging React components:
+
+- [Chrome Extension](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+- [Firefox Extension](https://addons.mozilla.org/en-US/firefox/addon/react-devtools/)
+
+### Additional DevTools
+
+<Accordion title="Redux DevTools">
+  For projects using Redux, install the Redux DevTools extension to inspect state changes and time-travel debug.
+  
+  ```javascript
+  // store.ts
+  const store = configureStore({
+    reducer: rootReducer,
+    devTools: process.env.NODE_ENV !== 'production'
+  })
+  ```
+</Accordion>
+
+<Accordion title="TanStack Query DevTools">
+  If using TanStack Query (React Query), the devtools are included:
+  
+  ```tsx
+  import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+  
+  function App() {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    )
+  }
+  ```
+</Accordion>
+
+## Starting Development Server
+
+Once your environment is set up, start the development server:
+
+<CodeGroup>
+```bash npm
+npm run dev
+```
+
+```bash yarn
+yarn dev
+```
+
+```bash pnpm
+pnpm dev
+```
+</CodeGroup>
+
+The application will be available at `http://localhost:3000`.
+
+<Tip>
+The development server includes hot module replacement (HMR), so changes are reflected immediately without a full page reload.
+</Tip>
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port 3000 is already in use:
+
+```bash
+# Find process using port 3000
+lsof -i :3000
+
+# Kill the process
+kill -9 <PID>
+
+# Or use a different port
+PORT=3001 npm run dev
+```
+
+### Node Modules Issues
+
+If you encounter dependency issues:
+
+```bash
+# Clear node_modules and lock file
+rm -rf node_modules package-lock.json
+
+# Reinstall dependencies
+npm install
+```
+
+### TypeScript Errors
+
+If TypeScript is not recognizing types:
+
+```bash
+# Restart TypeScript server in VS Code
+# Press Cmd/Ctrl + Shift + P
+# Type: "TypeScript: Restart TS Server"
+```

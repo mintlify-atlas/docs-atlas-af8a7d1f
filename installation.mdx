@@ -1,0 +1,478 @@
+---
+title: Installation
+description: Comprehensive guide to installing and configuring your development environment
+---
+
+# Installation
+
+This guide covers everything you need to install and configure the framework, including prerequisites, multiple installation methods, and troubleshooting common issues.
+
+## Prerequisites
+
+Before installing, ensure your system meets these requirements:
+
+### Node.js
+
+<Warning>
+  **Node.js 18.x or higher is required.** We recommend using the latest LTS version for the best experience and security updates.
+</Warning>
+
+Check your Node.js version:
+
+```bash
+node --version
+```
+
+If you need to install or upgrade Node.js:
+
+<CodeGroup>
+  ```bash macOS (Homebrew)
+  brew install node@20
+  ```
+
+  ```bash Windows (Winget)
+  winget install OpenJS.NodeJS.LTS
+  ```
+
+  ```bash Linux (apt)
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+  ```
+
+  ```bash Using nvm (All platforms)
+  nvm install --lts
+  nvm use --lts
+  ```
+</CodeGroup>
+
+<Note>
+  We recommend using [nvm](https://github.com/nvm-sh/nvm) (Node Version Manager) to manage multiple Node.js versions on your system.
+</Note>
+
+### Package Manager
+
+Choose one of the following package managers:
+
+- **npm** (comes bundled with Node.js)
+- **yarn** 1.22+ or yarn 3+
+- **pnpm** 8+ (recommended for monorepos)
+
+Install yarn or pnpm globally:
+
+<CodeGroup>
+  ```bash yarn
+  npm install -g yarn
+  ```
+
+  ```bash pnpm
+  npm install -g pnpm
+  ```
+</CodeGroup>
+
+### Code Editor
+
+While any editor works, we recommend **Visual Studio Code** with these extensions:
+
+- **ESLint** - Linting and code quality
+- **Prettier** - Code formatting
+- **TypeScript Vue Plugin** / **ES7+ React/Redux/React-Native snippets** - Framework-specific tooling
+- **Tailwind CSS IntelliSense** - If using Tailwind
+
+## Installation Methods
+
+### Method 1: Create a New Project (Recommended)
+
+The fastest way to get started is using our CLI scaffolding tool:
+
+<Steps>
+  <Step title="Run the Create Command">
+    <CodeGroup>
+      ```bash npm
+      npx create-frontend-app@latest my-project
+      ```
+
+      ```bash yarn
+      yarn create frontend-app my-project
+      ```
+
+      ```bash pnpm
+      pnpm create frontend-app my-project
+      ```
+    </CodeGroup>
+
+    Replace `my-project` with your desired project name.
+  </Step>
+
+  <Step title="Choose Your Configuration">
+    The CLI will prompt you for configuration options:
+
+    ```plaintext
+    ✔ Select a template › TypeScript
+    ✔ Add routing? … Yes
+    ✔ Add state management? … Yes
+    ✔ Select a styling solution › Tailwind CSS
+    ✔ Add testing utilities? … Yes
+    ✔ Initialize git repository? … Yes
+    ```
+
+    <Note>
+      For most projects, we recommend choosing TypeScript, routing, and Tailwind CSS.
+    </Note>
+  </Step>
+
+  <Step title="Navigate to Project">
+    ```bash
+    cd my-project
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Dependencies are installed automatically, but if you need to reinstall:
+
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+
+      ```bash pnpm
+      pnpm install
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Start Development Server">
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+
+      ```bash pnpm
+      pnpm dev
+      ```
+    </CodeGroup>
+
+    Your app will be running at `http://localhost:3000`
+  </Step>
+</Steps>
+
+### Method 2: Add to Existing Project
+
+If you have an existing project and want to add the framework:
+
+<Steps>
+  <Step title="Install Core Package">
+    <CodeGroup>
+      ```bash npm
+      npm install @frontend/core @frontend/router
+      ```
+
+      ```bash yarn
+      yarn add @frontend/core @frontend/router
+      ```
+
+      ```bash pnpm
+      pnpm add @frontend/core @frontend/router
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Install Dev Dependencies">
+    <CodeGroup>
+      ```bash npm
+      npm install -D @frontend/cli vite @vitejs/plugin-react typescript
+      ```
+
+      ```bash yarn
+      yarn add -D @frontend/cli vite @vitejs/plugin-react typescript
+      ```
+
+      ```bash pnpm
+      pnpm add -D @frontend/cli vite @vitejs/plugin-react typescript
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Create Configuration">
+    Create a `vite.config.ts` file in your project root:
+
+    ```typescript vite.config.ts
+    import { defineConfig } from 'vite'
+    import react from '@vitejs/plugin-react'
+    import { frontendPlugin } from '@frontend/vite-plugin'
+
+    export default defineConfig({
+      plugins: [
+        react(),
+        frontendPlugin({
+          router: true,
+          stateManagement: true,
+        }),
+      ],
+      resolve: {
+        alias: {
+          '@': '/src',
+        },
+      },
+    })
+    ```
+  </Step>
+
+  <Step title="Update TypeScript Config">
+    Update or create `tsconfig.json`:
+
+    ```json tsconfig.json
+    {
+      "compilerOptions": {
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "baseUrl": ".",
+        "paths": {
+          "@/*": ["./src/*"]
+        }
+      },
+      "include": ["src"],
+      "references": [{ "path": "./tsconfig.node.json" }]
+    }
+    ```
+  </Step>
+
+  <Step title="Add Scripts to package.json">
+    ```json package.json
+    {
+      "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+### Method 3: Clone a Template
+
+Start from our official templates:
+
+<CodeGroup>
+  ```bash Basic Template
+  git clone https://github.com/framework/template-basic.git my-project
+  cd my-project
+  npm install
+  ```
+
+  ```bash TypeScript + Tailwind
+  git clone https://github.com/framework/template-ts-tailwind.git my-project
+  cd my-project
+  npm install
+  ```
+
+  ```bash Full-Stack Template
+  git clone https://github.com/framework/template-fullstack.git my-project
+  cd my-project
+  npm install
+  ```
+</CodeGroup>
+
+## Verify Installation
+
+Run these commands to verify everything is working:
+
+```bash
+# Check framework version
+npx frontend --version
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+If all commands execute without errors, you're ready to start developing!
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env.local` file in your project root for environment-specific variables:
+
+```bash .env.local
+# API Configuration
+VITE_API_URL=https://api.example.com
+VITE_API_KEY=your_api_key_here
+
+# Feature Flags
+VITE_ENABLE_ANALYTICS=true
+VITE_ENABLE_DEBUG=false
+```
+
+<Warning>
+  Only variables prefixed with `VITE_` are exposed to your client-side code. Never commit `.env.local` to version control.
+</Warning>
+
+### Path Aliases
+
+Path aliases are configured in `tsconfig.json` and `vite.config.ts`. Default alias is `@` for the `src` directory:
+
+```tsx
+import { Button } from '@/components/Button'
+import { useAuth } from '@/hooks/useAuth'
+```
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port 3000 is already in use:
+
+```bash
+# Specify a different port
+npm run dev -- --port 3001
+```
+
+Or set it in `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  server: {
+    port: 3001,
+  },
+})
+```
+
+### Module Not Found Errors
+
+1. Clear your package manager cache:
+
+<CodeGroup>
+  ```bash npm
+  npm cache clean --force
+  rm -rf node_modules package-lock.json
+  npm install
+  ```
+
+  ```bash yarn
+  yarn cache clean
+  rm -rf node_modules yarn.lock
+  yarn install
+  ```
+
+  ```bash pnpm
+  pnpm store prune
+  rm -rf node_modules pnpm-lock.yaml
+  pnpm install
+  ```
+</CodeGroup>
+
+2. Ensure all peer dependencies are installed
+3. Check for typos in import paths
+4. Verify path aliases are configured correctly
+
+### TypeScript Errors
+
+If you're seeing TypeScript errors:
+
+1. Make sure you have TypeScript installed:
+   ```bash
+   npm install -D typescript @types/react @types/react-dom
+   ```
+
+2. Restart your TypeScript server in VS Code:
+   - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
+   - Type "TypeScript: Restart TS Server"
+
+3. Check your `tsconfig.json` is properly configured
+
+### Build Failures
+
+<Note>
+  Most build failures are due to type errors or missing dependencies. Check the error message carefully.
+</Note>
+
+Common solutions:
+
+1. Run type checking separately:
+   ```bash
+   npx tsc --noEmit
+   ```
+
+2. Clear build cache:
+   ```bash
+   rm -rf dist .vite
+   ```
+
+3. Ensure all imports use correct file extensions in the build output
+
+### Performance Issues
+
+If development server is slow:
+
+1. Enable SWC instead of Babel in `vite.config.ts`:
+   ```typescript
+   import react from '@vitejs/plugin-react-swc'
+   ```
+
+2. Exclude large directories from file watching:
+   ```typescript
+   export default defineConfig({
+     server: {
+       watch: {
+         ignored: ['**/node_modules/**', '**/dist/**'],
+       },
+     },
+   })
+   ```
+
+3. Use pnpm for faster installs in monorepos
+
+## Next Steps
+
+Now that you have everything installed:
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Build your first component in 5 minutes
+  </Card>
+  <Card title="Project Architecture" icon="folder-tree" href="/concepts/architecture">
+    Understand the recommended project organization
+  </Card>
+  <Card title="Development Setup" icon="gear" href="/development/setup">
+    Learn about advanced configuration options
+  </Card>
+  <Card title="Development Workflow" icon="terminal" href="/development/workflow">
+    Explore development best practices
+  </Card>
+</CardGroup>
+
+## Additional Resources
+
+- [GitHub Repository](https://github.com/framework/core)
+- [Community Discord](https://discord.gg/framework)
+- [Stack Overflow Tag](https://stackoverflow.com/questions/tagged/framework)
+- [Video Tutorials](https://youtube.com/framework)
+
+<Note>
+  Need help? Our community is active on Discord and we monitor Stack Overflow daily. Don't hesitate to ask questions!
+</Note>

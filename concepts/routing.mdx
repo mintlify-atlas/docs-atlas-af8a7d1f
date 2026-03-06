@@ -1,0 +1,704 @@
+---
+title: 'Routing & Navigation'
+description: 'Understanding routing concepts, navigation patterns, guards, and dynamic routes'
+icon: 'route'
+---
+
+## Routing Fundamentals
+
+Routing connects URLs to components, enabling multi-page experiences in single-page applications.
+
+<CardGroup cols={2}>
+  <Card title="Declarative Routes" icon="map">
+    Define routes as components for clear structure
+  </Card>
+  <Card title="Dynamic Segments" icon="brackets-curly">
+    URL parameters for dynamic content
+  </Card>
+  <Card title="Nested Routes" icon="layer-group">
+    Hierarchical routing with shared layouts
+  </Card>
+  <Card title="Navigation Guards" icon="shield-halved">
+    Protect routes with authentication checks
+  </Card>
+</CardGroup>
+
+## Route Configuration
+
+<Tabs>
+  <Tab title="React Router">
+    ### React Router Setup
+    
+    The most popular routing solution for React applications.
+    
+    ```tsx
+    import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+    
+    // Define routes configuration
+    const router = createBrowserRouter([
+      {
+        path: '/',
+        element: <RootLayout />,
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            index: true,
+            element: <HomePage />,
+          },
+          {
+            path: 'about',
+            element: <AboutPage />,
+          },
+          {
+            path: 'products',
+            element: <ProductsLayout />,
+            children: [
+              {
+                index: true,
+                element: <ProductsList />,
+              },
+              {
+                path: ':productId',
+                element: <ProductDetail />,
+                loader: productLoader,
+              },
+            ],
+          },
+          {
+            path: 'dashboard',
+            element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
+          },
+        ],
+      },
+    ]);
+    
+    function App() {
+      return <RouterProvider router={router} />;
+    }
+    ```
+    
+    <Info>
+      React Router v6+ uses data routers with loaders and actions for better data fetching patterns.
+    </Info>
+  </Tab>
+  
+  <Tab title="Next.js App Router">
+    ### Next.js File-Based Routing
+    
+    Next.js uses the file system for routing with special file conventions.
+    
+    ```
+    app/
+    ├── page.tsx                    # / route
+    ├── about/
+    │   └── page.tsx               # /about route
+    ├── products/
+    │   ├── page.tsx               # /products route
+    │   ├── [id]/
+    │   │   └── page.tsx           # /products/:id route
+    │   └── layout.tsx             # Shared layout
+    ├── dashboard/
+    │   ├── layout.tsx             # Dashboard layout
+    │   ├── page.tsx               # /dashboard route
+    │   ├── settings/
+    │   │   └── page.tsx           # /dashboard/settings
+    │   └── profile/
+    │       └── page.tsx           # /dashboard/profile
+    └── layout.tsx                 # Root layout
+    ```
+    
+    ```tsx
+    // app/products/[id]/page.tsx
+    interface PageProps {
+      params: { id: string };
+      searchParams: { [key: string]: string | string[] | undefined };
+    }
+    
+    export default async function ProductPage({ params }: PageProps) {
+      const product = await fetchProduct(params.id);
+      
+      return (
+        <div>
+          <h1>{product.name}</h1>
+          <p>{product.description}</p>
+        </div>
+      );
+    }
+    ```
+    
+    <Tip>
+      Next.js App Router provides server components by default, improving initial load performance.
+    </Tip>
+  </Tab>
+  
+  <Tab title="TanStack Router">
+    ### TanStack Router
+    
+    Type-safe routing with built-in data loading and route params validation.
+    
+    ```tsx
+    import { createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
+    
+    // Root route
+    const rootRoute = createRootRoute({
+      component: RootLayout,
+    });
+    
+    // Index route
+    const indexRoute = createRoute({
+      getParentRoute: () => rootRoute,
+      path: '/',
+      component: HomePage,
+    });
+    
+    // Dynamic route with loader
+    const productRoute = createRoute({
+      getParentRoute: () => rootRoute,
+      path: '/products/$productId',
+      loader: async ({ params }) => {
+        const product = await fetchProduct(params.productId);
+        return { product };
+      },
+      component: ProductDetail,
+    });
+    
+    // Create router
+    const routeTree = rootRoute.addChildren([
+      indexRoute,
+      productRoute,
+    ]);
+    
+    const router = createRouter({ routeTree });
+    
+    // Type-safe navigation
+    function MyComponent() {
+      const navigate = useNavigate();
+      
+      const goToProduct = (id: string) => {
+        navigate({
+          to: '/products/$productId',
+          params: { productId: id }, // Fully typed!
+        });
+      };
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Navigation Patterns
+
+### Programmatic Navigation
+
+```tsx
+import { useNavigate, useLocation } from 'react-router-dom';
+
+function LoginForm() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const handleSubmit = async (credentials: Credentials) => {
+    try {
+      await login(credentials);
+      
+      // Redirect to the page user was trying to access
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    } catch (error) {
+      toast.error('Login failed');
+    }
+  };
+  
+  return <form onSubmit={handleSubmit}>{/* form fields */}</form>;
+}
+```
+
+### Link Components
+
+```tsx
+import { Link, NavLink } from 'react-router-dom';
+
+// Basic link
+<Link to="/about">About Us</Link>
+
+// Link with state
+<Link
+  to="/products/123"
+  state={{ from: 'search-results' }}
+>
+  View Product
+</Link>
+
+// NavLink with active styling
+<NavLink
+  to="/dashboard"
+  className={({ isActive }) =>
+    isActive ? 'nav-link active' : 'nav-link'
+  }
+>
+  Dashboard
+</NavLink>
+
+// Relative navigation
+<Link to="..">Back to list</Link>
+<Link to="./edit">Edit</Link>
+```
+
+<Note>
+  Use `<Link>` for navigation instead of `<a>` tags to avoid full page reloads in SPAs.
+</Note>
+
+### Search Params and Filters
+
+```tsx
+import { useSearchParams } from 'react-router-dom';
+
+function ProductsList() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const category = searchParams.get('category') || 'all';
+  const sort = searchParams.get('sort') || 'name';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  
+  const updateFilter = (key: string, value: string) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set(key, value);
+      next.set('page', '1'); // Reset page on filter change
+      return next;
+    });
+  };
+  
+  const clearFilters = () => {
+    setSearchParams({});
+  };
+  
+  return (
+    <div>
+      <select
+        value={category}
+        onChange={(e) => updateFilter('category', e.target.value)}
+      >
+        <option value="all">All Categories</option>
+        <option value="electronics">Electronics</option>
+        <option value="clothing">Clothing</option>
+      </select>
+      
+      <select
+        value={sort}
+        onChange={(e) => updateFilter('sort', e.target.value)}
+      >
+        <option value="name">Name</option>
+        <option value="price">Price</option>
+        <option value="date">Date Added</option>
+      </select>
+      
+      <button onClick={clearFilters}>Clear Filters</button>
+      
+      <ProductGrid category={category} sort={sort} page={page} />
+    </div>
+  );
+}
+```
+
+## Dynamic Routes
+
+### Route Parameters
+
+```tsx
+import { useParams, useLoaderData } from 'react-router-dom';
+
+// Route configuration
+{
+  path: '/blog/:slug',
+  element: <BlogPost />,
+  loader: async ({ params }) => {
+    return fetchBlogPost(params.slug);
+  },
+}
+
+// Component using params
+function BlogPost() {
+  const { slug } = useParams<{ slug: string }>();
+  const post = useLoaderData() as BlogPost;
+  
+  return (
+    <article>
+      <h1>{post.title}</h1>
+      <p className="meta">Posted on {post.date}</p>
+      <div dangerouslySetInnerHTML={{ __html: post.content }} />
+    </article>
+  );
+}
+```
+
+### Optional Parameters
+
+```tsx
+// Route with optional segment
+{
+  path: '/shop/:category?',
+  element: <Shop />,
+}
+
+function Shop() {
+  const { category } = useParams<{ category?: string }>();
+  
+  // Handle both /shop and /shop/electronics
+  const products = useProducts(category || 'all');
+  
+  return <ProductGrid products={products} />;
+}
+```
+
+### Wildcard Routes
+
+```tsx
+// Catch-all route for documentation
+{
+  path: '/docs/*',
+  element: <Documentation />,
+}
+
+function Documentation() {
+  const location = useLocation();
+  // location.pathname: "/docs/getting-started/installation"
+  
+  const path = location.pathname.replace('/docs/', '');
+  const content = useDocContent(path);
+  
+  return <MarkdownRenderer content={content} />;
+}
+```
+
+## Route Guards & Protection
+
+### Authentication Guard
+
+```tsx
+import { Navigate, useLocation } from 'react-router-dom';
+
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
+  
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+  
+  if (!user) {
+    // Redirect to login, save attempted location
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Usage
+{
+  path: '/dashboard',
+  element: (
+    <ProtectedRoute>
+      <Dashboard />
+    </ProtectedRoute>
+  ),
+}
+```
+
+### Role-Based Access
+
+```tsx
+interface RoleGuardProps {
+  children: ReactNode;
+  requiredRoles: string[];
+  fallback?: ReactNode;
+}
+
+function RoleGuard({ children, requiredRoles, fallback }: RoleGuardProps) {
+  const { user } = useAuth();
+  
+  const hasRequiredRole = requiredRoles.some(role =>
+    user?.roles.includes(role)
+  );
+  
+  if (!hasRequiredRole) {
+    return fallback || <Navigate to="/unauthorized" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+// Usage
+<RoleGuard requiredRoles={['admin', 'editor']}>
+  <AdminPanel />
+</RoleGuard>
+```
+
+### Navigation Confirmation
+
+```tsx
+import { useBlocker } from 'react-router-dom';
+
+function FormWithConfirmation() {
+  const [formData, setFormData] = useState({});
+  const [isDirty, setIsDirty] = useState(false);
+  
+  // Block navigation if form has unsaved changes
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname
+  );
+  
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      const confirm = window.confirm(
+        'You have unsaved changes. Are you sure you want to leave?'
+      );
+      
+      if (confirm) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
+  
+  return (
+    <form onChange={() => setIsDirty(true)}>
+      {/* form fields */}
+    </form>
+  );
+}
+```
+
+<Tip>
+  Always save navigation blockers for scenarios where losing data would be problematic, like unsaved forms.
+</Tip>
+
+## Nested Routes & Layouts
+
+### Shared Layouts
+
+```tsx
+import { Outlet } from 'react-router-dom';
+
+// Dashboard layout with sidebar
+function DashboardLayout() {
+  return (
+    <div className="dashboard">
+      <DashboardSidebar />
+      <main className="dashboard-content">
+        {/* Child routes render here */}
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
+// Route configuration
+{
+  path: '/dashboard',
+  element: <DashboardLayout />,
+  children: [
+    { index: true, element: <DashboardHome /> },
+    { path: 'analytics', element: <Analytics /> },
+    { path: 'settings', element: <Settings /> },
+    {
+      path: 'team',
+      element: <TeamLayout />,
+      children: [
+        { index: true, element: <TeamList /> },
+        { path: ':teamId', element: <TeamDetail /> },
+      ],
+    },
+  ],
+}
+```
+
+### Outlet Context
+
+```tsx
+interface DashboardContextType {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+}
+
+function DashboardLayout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  const context: DashboardContextType = {
+    isSidebarOpen,
+    toggleSidebar: () => setIsSidebarOpen(prev => !prev),
+  };
+  
+  return (
+    <div className="dashboard">
+      <DashboardSidebar isOpen={isSidebarOpen} />
+      <Outlet context={context} />
+    </div>
+  );
+}
+
+// Child route accessing context
+function Analytics() {
+  const { isSidebarOpen, toggleSidebar } = useOutletContext<DashboardContextType>();
+  
+  return (
+    <div>
+      <button onClick={toggleSidebar}>Toggle Sidebar</button>
+      {/* Analytics content */}
+    </div>
+  );
+}
+```
+
+## Loading States & Error Handling
+
+### Route Loaders
+
+```tsx
+// Data loader for route
+async function productLoader({ params }: LoaderFunctionArgs) {
+  const product = await fetchProduct(params.productId);
+  
+  if (!product) {
+    throw new Response('Not Found', { status: 404 });
+  }
+  
+  return { product };
+}
+
+// Route configuration
+{
+  path: '/products/:productId',
+  element: <ProductDetail />,
+  loader: productLoader,
+  errorElement: <ProductError />,
+}
+
+// Component using loaded data
+function ProductDetail() {
+  const { product } = useLoaderData() as { product: Product };
+  
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>${product.price}</p>
+    </div>
+  );
+}
+```
+
+### Error Boundaries
+
+```tsx
+import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
+
+function ErrorPage() {
+  const error = useRouteError();
+  
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div className="error-page">
+        <h1>{error.status}</h1>
+        <p>{error.statusText}</p>
+        {error.data?.message && <p>{error.data.message}</p>}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="error-page">
+      <h1>Oops!</h1>
+      <p>Sorry, an unexpected error occurred.</p>
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+<Accordion title="1. Use Route-Based Code Splitting">
+  ```tsx
+  import { lazy, Suspense } from 'react';
+  
+  const Dashboard = lazy(() => import('./pages/Dashboard'));
+  const Settings = lazy(() => import('./pages/Settings'));
+  
+  const router = createBrowserRouter([
+    {
+      path: '/dashboard',
+      element: (
+        <Suspense fallback={<LoadingSpinner />}>
+          <Dashboard />
+        </Suspense>
+      ),
+    },
+  ]);
+  ```
+  
+  Split large routes to reduce initial bundle size.
+</Accordion>
+
+<Accordion title="2. Centralize Route Paths">
+  ```tsx
+  // routes.ts
+  export const ROUTES = {
+    HOME: '/',
+    PRODUCTS: '/products',
+    PRODUCT_DETAIL: (id: string) => `/products/${id}`,
+    DASHBOARD: '/dashboard',
+    SETTINGS: '/dashboard/settings',
+  } as const;
+  
+  // Usage
+  <Link to={ROUTES.PRODUCT_DETAIL('123')}>View Product</Link>
+  ```
+  
+  Avoid hardcoding paths throughout your app.
+</Accordion>
+
+<Accordion title="3. Preserve Scroll Position">
+  ```tsx
+  import { useEffect } from 'react';
+  import { useLocation } from 'react-router-dom';
+  
+  function ScrollToTop() {
+    const { pathname } = useLocation();
+    
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, [pathname]);
+    
+    return null;
+  }
+  
+  // Add to app root
+  <Router>
+    <ScrollToTop />
+    <Routes>{/* routes */}</Routes>
+  </Router>
+  ```
+</Accordion>
+
+<Accordion title="4. Handle 404s Gracefully">
+  ```tsx
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  }
+  
+  function NotFoundPage() {
+    return (
+      <div className="not-found">
+        <h1>404 - Page Not Found</h1>
+        <p>The page you're looking for doesn't exist.</p>
+        <Link to="/">Go Home</Link>
+      </div>
+    );
+  }
+  ```
+</Accordion>
+
+<Note>
+  Good routing makes navigation intuitive and URLs shareable. Invest time in getting your routing structure right early.
+</Note>

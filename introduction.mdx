@@ -1,0 +1,115 @@
+---
+title: Introduction
+description: Welcome to our modern frontend framework - build fast, scalable, and beautiful web applications
+---
+
+# Introduction
+
+Welcome to our comprehensive frontend framework designed to streamline your development workflow and help you build production-ready web applications with confidence.
+
+## What is This Framework?
+
+This framework is a modern, component-based solution for building interactive user interfaces. It combines the best practices from the React ecosystem with powerful tooling, TypeScript support, and an intuitive API that scales from simple landing pages to complex enterprise applications.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Component-Driven" icon="cube">
+    Build encapsulated components that manage their own state, then compose them to create complex UIs
+  </Card>
+  <Card title="TypeScript First" icon="code">
+    Full TypeScript support with intelligent type inference and autocomplete for enhanced developer experience
+  </Card>
+  <Card title="Performance Optimized" icon="bolt">
+    Automatic code splitting, lazy loading, and optimized bundle sizes for lightning-fast load times
+  </Card>
+  <Card title="Developer Experience" icon="heart">
+    Hot module replacement, detailed error messages, and comprehensive debugging tools
+  </Card>
+</CardGroup>
+
+## Why Choose This Framework?
+
+### Modern Architecture
+
+Built on modern web standards with a focus on performance, accessibility, and maintainability. Our framework leverages the latest ECMAScript features and follows industry best practices.
+
+### Flexible & Extensible
+
+Whether you're building a single-page application, a static site, or a server-rendered application, our framework adapts to your needs. Plugin architecture allows you to extend functionality without bloating your core bundle.
+
+### Production Ready
+
+Trusted by thousands of developers and organizations worldwide. Ships with built-in routing, state management, and form handling - everything you need to go from prototype to production.
+
+## Who Is This For?
+
+<Note>
+  This framework is ideal for developers who want to build modern web applications without getting bogged down in configuration and boilerplate.
+</Note>
+
+- **Frontend Developers** looking for a robust solution with great DX
+- **Full-Stack Teams** needing a reliable frontend that integrates seamlessly with any backend
+- **Startups** wanting to move fast without sacrificing code quality
+- **Enterprise Teams** requiring scalability, TypeScript support, and long-term maintainability
+
+## Core Concepts
+
+### Components
+
+Components are the building blocks of your application. They're reusable, self-contained pieces of UI that encapsulate markup, styles, and behavior.
+
+```tsx
+export function Button({ label, onClick }) {
+  return (
+    <button className="btn-primary" onClick={onClick}>
+      {label}
+    </button>
+  )
+}
+```
+
+### State Management
+
+Manage application state with built-in hooks and state containers. Simple for basic needs, powerful for complex scenarios.
+
+```tsx
+import { useState } from 'framework'
+
+export function Counter() {
+  const [count, setCount] = useState(0)
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  )
+}
+```
+
+### Routing
+
+Built-in file-based routing makes navigation intuitive. Create a file, and you've created a route.
+
+```tsx
+// pages/dashboard.tsx automatically becomes /dashboard
+export default function Dashboard() {
+  return <h1>Dashboard</h1>
+}
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running in under 5 minutes
+  </Card>
+  <Card title="Installation" icon="download" href="/installation">
+    Detailed installation and setup instructions
+  </Card>
+</CardGroup>
+
+<Warning>
+  Make sure you have Node.js 18.x or higher installed before proceeding with the installation.
+</Warning>

@@ -1,0 +1,395 @@
+---
+title: 'Architecture Overview'
+description: 'Understanding the overall architecture, folder structure, and design patterns'
+icon: 'sitemap'
+---
+
+## Architecture Principles
+
+Our frontend architecture follows a modular, scalable approach designed to support long-term maintainability and team collaboration.
+
+<CardGroup cols={2}>
+  <Card title="Separation of Concerns" icon="layer-group">
+    Clear boundaries between UI, business logic, and data layers
+  </Card>
+  <Card title="Component-Driven" icon="cube">
+    Reusable, composable components as building blocks
+  </Card>
+  <Card title="Unidirectional Data Flow" icon="arrow-right">
+    Predictable state changes and data propagation
+  </Card>
+  <Card title="Performance First" icon="gauge-high">
+    Optimized rendering and lazy loading strategies
+  </Card>
+</CardGroup>
+
+## Folder Structure
+
+Our project follows a feature-based organization pattern:
+
+```
+src/
+├── components/          # Shared UI components
+│   ├── common/         # Basic reusable components (Button, Input, etc.)
+│   ├── layout/         # Layout components (Header, Sidebar, Footer)
+│   └── features/       # Feature-specific components
+├── pages/              # Page-level components and route handlers
+├── features/           # Feature modules (business logic + components)
+│   ├── auth/
+│   ├── dashboard/
+│   └── user-profile/
+├── hooks/              # Custom React hooks
+├── services/           # API clients and external service integrations
+├── stores/             # State management (stores, actions, reducers)
+├── utils/              # Utility functions and helpers
+├── types/              # TypeScript type definitions
+├── styles/             # Global styles and theme configuration
+└── config/             # App configuration and constants
+```
+
+<Note>
+  Feature folders contain everything related to that feature: components, hooks, types, and logic. This promotes cohesion and makes features easier to maintain or remove.
+</Note>
+
+## Architectural Layers
+
+<Tabs>
+  <Tab title="Presentation Layer">
+    ### Presentation Layer
+    
+    The presentation layer consists of React components responsible for rendering UI and handling user interactions.
+    
+    **Key Responsibilities:**
+    - Render UI based on props and state
+    - Handle user events
+    - Delegate business logic to hooks or services
+    - Maintain minimal local state
+    
+    ```tsx
+    // Example: Pure presentation component
+    interface UserCardProps {
+      user: User;
+      onEdit: (id: string) => void;
+    }
+    
+    export function UserCard({ user, onEdit }: UserCardProps) {
+      return (
+        <div className="user-card">
+          <Avatar src={user.avatar} alt={user.name} />
+          <h3>{user.name}</h3>
+          <p>{user.email}</p>
+          <Button onClick={() => onEdit(user.id)}>Edit Profile</Button>
+        </div>
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Business Logic Layer">
+    ### Business Logic Layer
+    
+    Custom hooks and service functions encapsulate business logic, keeping components clean and focused.
+    
+    **Key Responsibilities:**
+    - Implement business rules and validation
+    - Coordinate between services and state management
+    - Provide reusable logic across components
+    - Handle side effects
+    
+    ```tsx
+    // Example: Business logic in custom hook
+    export function useUserProfile(userId: string) {
+      const [user, setUser] = useState<User | null>(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState<Error | null>(null);
+      
+      useEffect(() => {
+        async function fetchUser() {
+          try {
+            setLoading(true);
+            const data = await userService.getUser(userId);
+            // Business logic: validate and transform data
+            if (data.status === 'active') {
+              setUser(data);
+            } else {
+              throw new Error('User account is not active');
+            }
+          } catch (err) {
+            setError(err as Error);
+          } finally {
+            setLoading(false);
+          }
+        }
+        
+        fetchUser();
+      }, [userId]);
+      
+      return { user, loading, error };
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Data Layer">
+    ### Data Layer
+    
+    Services and API clients handle data fetching, caching, and synchronization with backend systems.
+    
+    **Key Responsibilities:**
+    - HTTP requests and API communication
+    - Data transformation and normalization
+    - Caching strategies
+    - Error handling and retry logic
+    
+    ```tsx
+    // Example: Service with API client
+    class UserService {
+      private api: ApiClient;
+      
+      constructor(api: ApiClient) {
+        this.api = api;
+      }
+      
+      async getUser(id: string): Promise<User> {
+        const response = await this.api.get(`/users/${id}`);
+        return this.transformUser(response.data);
+      }
+      
+      async updateUser(id: string, data: Partial<User>): Promise<User> {
+        const response = await this.api.patch(`/users/${id}`, data);
+        return this.transformUser(response.data);
+      }
+      
+      private transformUser(raw: any): User {
+        // Normalize and validate data
+        return {
+          id: raw.id,
+          name: raw.full_name,
+          email: raw.email,
+          avatar: raw.avatar_url || '/default-avatar.png',
+          status: raw.account_status,
+        };
+      }
+    }
+    
+    export const userService = new UserService(apiClient);
+    ```
+  </Tab>
+</Tabs>
+
+## Design Patterns
+
+### Container/Presenter Pattern
+
+Separate data-fetching logic from presentation for better testability and reusability.
+
+<Accordion title="Container Component Example">
+  ```tsx
+  // UserProfileContainer.tsx - Handles data and logic
+  export function UserProfileContainer({ userId }: { userId: string }) {
+    const { user, loading, error } = useUserProfile(userId);
+    const { updateProfile } = useUserActions();
+    
+    const handleEdit = async (data: Partial<User>) => {
+      await updateProfile(userId, data);
+    };
+    
+    if (loading) return <LoadingSpinner />;
+    if (error) return <ErrorMessage error={error} />;
+    if (!user) return <NotFound />;
+    
+    return <UserProfilePresenter user={user} onEdit={handleEdit} />;
+  }
+  
+  // UserProfilePresenter.tsx - Pure presentation
+  interface UserProfilePresenterProps {
+    user: User;
+    onEdit: (data: Partial<User>) => void;
+  }
+  
+  export function UserProfilePresenter({ user, onEdit }: UserProfilePresenterProps) {
+    return (
+      <div className="user-profile">
+        <UserCard user={user} />
+        <UserEditForm user={user} onSubmit={onEdit} />
+      </div>
+    );
+  }
+  ```
+</Accordion>
+
+### Compound Components Pattern
+
+Create flexible, composable components that work together while sharing implicit state.
+
+```tsx
+// Example: Tabs compound component
+interface TabsContextValue {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+const TabsContext = createContext<TabsContextValue | null>(null);
+
+export function Tabs({ children, defaultTab }: { children: ReactNode; defaultTab: string }) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  
+  return (
+    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+      <div className="tabs">{children}</div>
+    </TabsContext.Provider>
+  );
+}
+
+Tabs.List = function TabsList({ children }: { children: ReactNode }) {
+  return <div className="tabs-list">{children}</div>;
+};
+
+Tabs.Tab = function Tab({ value, children }: { value: string; children: ReactNode }) {
+  const context = useContext(TabsContext);
+  if (!context) throw new Error('Tab must be used within Tabs');
+  
+  const isActive = context.activeTab === value;
+  return (
+    <button
+      className={`tab ${isActive ? 'active' : ''}`}
+      onClick={() => context.setActiveTab(value)}
+    >
+      {children}
+    </button>
+  );
+};
+
+Tabs.Panel = function TabPanel({ value, children }: { value: string; children: ReactNode }) {
+  const context = useContext(TabsContext);
+  if (!context) throw new Error('TabPanel must be used within Tabs');
+  
+  if (context.activeTab !== value) return null;
+  return <div className="tab-panel">{children}</div>;
+};
+```
+
+<Tip>
+  Compound components provide excellent API flexibility while maintaining encapsulation. They're ideal for complex UI patterns like tabs, accordions, and dropdowns.
+</Tip>
+
+### Higher-Order Components (HOCs)
+
+Enhance components with additional functionality through composition.
+
+```tsx
+// Example: Authentication HOC
+export function withAuth<P extends object>(Component: ComponentType<P>) {
+  return function AuthenticatedComponent(props: P) {
+    const { user, loading } = useAuth();
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+      if (!loading && !user) {
+        navigate('/login');
+      }
+    }, [user, loading, navigate]);
+    
+    if (loading) return <LoadingSpinner />;
+    if (!user) return null;
+    
+    return <Component {...props} />;
+  };
+}
+
+// Usage
+const ProtectedDashboard = withAuth(Dashboard);
+```
+
+## Component Hierarchy
+
+Our component tree follows a clear hierarchy from app root to leaf components:
+
+```
+App
+├── AppProviders (Context providers, theme, auth)
+│   ├── Router
+│   │   ├── Layout
+│   │   │   ├── Header
+│   │   │   │   ├── Navigation
+│   │   │   │   └── UserMenu
+│   │   │   ├── Sidebar
+│   │   │   │   └── NavItems
+│   │   │   ├── Main
+│   │   │   │   └── [Page Components]
+│   │   │   └── Footer
+```
+
+<Info>
+  Keep your component tree shallow to avoid prop drilling. Use context or state management for deeply nested data needs.
+</Info>
+
+## Performance Optimization Strategies
+
+### Code Splitting
+
+Lazy load routes and heavy components to reduce initial bundle size.
+
+```tsx
+import { lazy, Suspense } from 'react';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+
+function App() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<UserProfile />} />
+      </Routes>
+    </Suspense>
+  );
+}
+```
+
+### Memoization
+
+Prevent unnecessary re-renders with React.memo and useMemo.
+
+```tsx
+// Memoize expensive computations
+function ProductList({ products, filterTerm }: Props) {
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => 
+      p.name.toLowerCase().includes(filterTerm.toLowerCase())
+    );
+  }, [products, filterTerm]);
+  
+  return (
+    <div>
+      {filteredProducts.map(product => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+// Memoize components
+export const ProductCard = memo(function ProductCard({ product }: Props) {
+  return (
+    <div className="product-card">
+      <h3>{product.name}</h3>
+      <p>${product.price}</p>
+    </div>
+  );
+});
+```
+
+## Best Practices
+
+1. **Keep Components Small**: Each component should have a single responsibility
+2. **Favor Composition**: Build complex UIs by composing simple components
+3. **Consistent Naming**: Use clear, descriptive names that reflect component purpose
+4. **Type Safety**: Leverage TypeScript for better developer experience and fewer bugs
+5. **Test at the Right Level**: Unit test logic, integration test user flows
+6. **Document Complex Logic**: Add comments for non-obvious business rules
+7. **Performance Budgets**: Monitor and optimize bundle size and runtime performance
+
+<Note>
+  Architecture is never finished. Regularly review and refactor as your application evolves and requirements change.
+</Note>

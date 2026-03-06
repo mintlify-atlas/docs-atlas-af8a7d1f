@@ -1,0 +1,641 @@
+---
+title: 'Helper Functions'
+description: 'Utility functions for formatting, validation, data manipulation, and common operations'
+icon: 'wrench'
+---
+
+## Formatters
+
+### formatCurrency
+
+Formats a number as currency with proper localization.
+
+#### Parameters
+
+<ParamField path="amount" type="number" required={true}>
+  The amount to format
+</ParamField>
+
+<ParamField path="options" type="CurrencyFormatOptions" required={false}>
+  Formatting options
+  
+  <Expandable title="properties">
+    <ResponseField name="currency" type="string" default="'USD'">
+      ISO 4217 currency code (e.g., 'USD', 'EUR', 'GBP')
+    </ResponseField>
+    
+    <ResponseField name="locale" type="string" default="'en-US'">
+      BCP 47 language tag for localization
+    </ResponseField>
+    
+    <ResponseField name="decimals" type="number" default="2">
+      Number of decimal places
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="formatted" type="string">
+  Formatted currency string
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { formatCurrency } from '@/utils/formatters';
+
+formatCurrency(1234.56); // "$1,234.56"
+formatCurrency(1234.56, { currency: 'EUR', locale: 'de-DE' }); // "1.234,56 €"
+formatCurrency(1234.5, { decimals: 0 }); // "$1,235"
+```
+</CodeGroup>
+
+---
+
+### formatDate
+
+Formats a date according to specified format and locale.
+
+#### Parameters
+
+<ParamField path="date" type="Date | string | number" required={true}>
+  The date to format (Date object, ISO string, or timestamp)
+</ParamField>
+
+<ParamField path="format" type="DateFormat" required={false} default="'medium'">
+  Format preset: 'short', 'medium', 'long', 'full', or custom format string
+</ParamField>
+
+<ParamField path="options" type="DateFormatOptions" required={false}>
+  Additional formatting options
+  
+  <Expandable title="properties">
+    <ResponseField name="locale" type="string" default="'en-US'">
+      BCP 47 language tag for localization
+    </ResponseField>
+    
+    <ResponseField name="timeZone" type="string">
+      IANA time zone name (e.g., 'America/New_York')
+    </ResponseField>
+    
+    <ResponseField name="includeTime" type="boolean" default="false">
+      Include time in the formatted output
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="formatted" type="string">
+  Formatted date string
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { formatDate } from '@/utils/formatters';
+
+const date = new Date('2024-03-15T14:30:00Z');
+
+formatDate(date); // "Mar 15, 2024"
+formatDate(date, 'long'); // "March 15, 2024"
+formatDate(date, 'short', { includeTime: true }); // "3/15/24, 2:30 PM"
+formatDate(date, 'YYYY-MM-DD'); // "2024-03-15"
+formatDate(date, 'medium', { locale: 'fr-FR' }); // "15 mars 2024"
+```
+</CodeGroup>
+
+---
+
+### formatFileSize
+
+Formats bytes into human-readable file size.
+
+#### Parameters
+
+<ParamField path="bytes" type="number" required={true}>
+  Number of bytes
+</ParamField>
+
+<ParamField path="decimals" type="number" required={false} default="2">
+  Number of decimal places
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="formatted" type="string">
+  Formatted file size (e.g., "1.5 MB")
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { formatFileSize } from '@/utils/formatters';
+
+formatFileSize(1024); // "1.00 KB"
+formatFileSize(1536, 0); // "2 KB"
+formatFileSize(1048576); // "1.00 MB"
+formatFileSize(1234567890); // "1.15 GB"
+```
+</CodeGroup>
+
+---
+
+### formatPhoneNumber
+
+Formats a phone number string according to regional standards.
+
+#### Parameters
+
+<ParamField path="phoneNumber" type="string" required={true}>
+  Phone number string (digits only or with formatting)
+</ParamField>
+
+<ParamField path="countryCode" type="string" required={false} default="'US'">
+  ISO 3166-1 alpha-2 country code
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="formatted" type="string">
+  Formatted phone number
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { formatPhoneNumber } from '@/utils/formatters';
+
+formatPhoneNumber('5551234567'); // "(555) 123-4567"
+formatPhoneNumber('5551234567', 'US'); // "(555) 123-4567"
+formatPhoneNumber('2079460123', 'GB'); // "020 7946 0123"
+```
+</CodeGroup>
+
+---
+
+## Validators
+
+### validateEmail
+
+Validates an email address format.
+
+#### Parameters
+
+<ParamField path="email" type="string" required={true}>
+  Email address to validate
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="isValid" type="boolean">
+  Whether the email is valid
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { validateEmail } from '@/utils/validators';
+
+validateEmail('user@example.com'); // true
+validateEmail('invalid.email'); // false
+validateEmail('user@domain'); // false
+```
+</CodeGroup>
+
+---
+
+### validatePassword
+
+Validates password strength against configurable rules.
+
+#### Parameters
+
+<ParamField path="password" type="string" required={true}>
+  Password to validate
+</ParamField>
+
+<ParamField path="requirements" type="PasswordRequirements" required={false}>
+  Password strength requirements
+  
+  <Expandable title="properties">
+    <ResponseField name="minLength" type="number" default="8">
+      Minimum password length
+    </ResponseField>
+    
+    <ResponseField name="requireUppercase" type="boolean" default="true">
+      Require at least one uppercase letter
+    </ResponseField>
+    
+    <ResponseField name="requireLowercase" type="boolean" default="true">
+      Require at least one lowercase letter
+    </ResponseField>
+    
+    <ResponseField name="requireNumbers" type="boolean" default="true">
+      Require at least one number
+    </ResponseField>
+    
+    <ResponseField name="requireSpecialChars" type="boolean" default="true">
+      Require at least one special character
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="result" type="ValidationResult">
+  Validation result object
+  
+  <Expandable title="properties">
+    <ResponseField name="isValid" type="boolean">
+      Whether the password meets all requirements
+    </ResponseField>
+    
+    <ResponseField name="errors" type="string[]">
+      Array of validation error messages
+    </ResponseField>
+    
+    <ResponseField name="strength" type="'weak' | 'medium' | 'strong'">
+      Password strength rating
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { validatePassword } from '@/utils/validators';
+
+validatePassword('Pass123!');
+// { isValid: true, errors: [], strength: 'strong' }
+
+validatePassword('weak');
+// { 
+//   isValid: false, 
+//   errors: ['Must be at least 8 characters', 'Must contain a number'],
+//   strength: 'weak'
+// }
+
+validatePassword('simple123', { requireSpecialChars: false });
+// { isValid: true, errors: [], strength: 'medium' }
+```
+</CodeGroup>
+
+---
+
+### validateURL
+
+Validates a URL format.
+
+#### Parameters
+
+<ParamField path="url" type="string" required={true}>
+  URL to validate
+</ParamField>
+
+<ParamField path="options" type="URLValidationOptions" required={false}>
+  Validation options
+  
+  <Expandable title="properties">
+    <ResponseField name="allowedProtocols" type="string[]" default="['http', 'https']">
+      Allowed URL protocols
+    </ResponseField>
+    
+    <ResponseField name="requireProtocol" type="boolean" default="true">
+      Whether protocol is required
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="isValid" type="boolean">
+  Whether the URL is valid
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { validateURL } from '@/utils/validators';
+
+validateURL('https://example.com'); // true
+validateURL('not-a-url'); // false
+validateURL('ftp://files.com', { allowedProtocols: ['ftp'] }); // true
+```
+</CodeGroup>
+
+---
+
+## Data Manipulation
+
+### debounce
+
+Creates a debounced function that delays execution.
+
+#### Parameters
+
+<ParamField path="func" type="Function" required={true}>
+  The function to debounce
+</ParamField>
+
+<ParamField path="delay" type="number" required={true}>
+  Delay in milliseconds
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="debouncedFunc" type="Function & { cancel: () => void }">
+  Debounced function with a cancel method
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { debounce } from '@/utils/helpers';
+
+const handleSearch = debounce((query: string) => {
+  console.log('Searching for:', query);
+}, 500);
+
+// Only executes once after 500ms of no calls
+handleSearch('a');
+handleSearch('ab');
+handleSearch('abc'); // Only this will execute
+
+// Cancel pending execution
+handleSearch.cancel();
+```
+</CodeGroup>
+
+---
+
+### throttle
+
+Creates a throttled function that executes at most once per interval.
+
+#### Parameters
+
+<ParamField path="func" type="Function" required={true}>
+  The function to throttle
+</ParamField>
+
+<ParamField path="interval" type="number" required={true}>
+  Interval in milliseconds
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="throttledFunc" type="Function">
+  Throttled function
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { throttle } from '@/utils/helpers';
+
+const handleScroll = throttle(() => {
+  console.log('Scroll position:', window.scrollY);
+}, 200);
+
+window.addEventListener('scroll', handleScroll);
+```
+</CodeGroup>
+
+---
+
+### deepClone
+
+Creates a deep copy of an object or array.
+
+#### Parameters
+
+<ParamField path="value" type="T" required={true}>
+  Value to clone
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="cloned" type="T">
+  Deep cloned copy of the value
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { deepClone } from '@/utils/helpers';
+
+const original = { name: 'John', address: { city: 'NYC' } };
+const cloned = deepClone(original);
+
+cloned.address.city = 'LA';
+console.log(original.address.city); // "NYC" (unchanged)
+```
+</CodeGroup>
+
+---
+
+### groupBy
+
+Groups array items by a specified key or function.
+
+#### Parameters
+
+<ParamField path="array" type="T[]" required={true}>
+  Array to group
+</ParamField>
+
+<ParamField path="keyOrFn" type="keyof T | ((item: T) => string)" required={true}>
+  Property key or function to group by
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="grouped" type="Record<string, T[]>">
+  Object with grouped items
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { groupBy } from '@/utils/helpers';
+
+const users = [
+  { name: 'Alice', role: 'admin' },
+  { name: 'Bob', role: 'user' },
+  { name: 'Charlie', role: 'admin' }
+];
+
+const byRole = groupBy(users, 'role');
+// {
+//   admin: [{ name: 'Alice', role: 'admin' }, { name: 'Charlie', role: 'admin' }],
+//   user: [{ name: 'Bob', role: 'user' }]
+// }
+
+const byFirstLetter = groupBy(users, user => user.name[0]);
+// {
+//   A: [{ name: 'Alice', role: 'admin' }],
+//   B: [{ name: 'Bob', role: 'user' }],
+//   C: [{ name: 'Charlie', role: 'admin' }]
+// }
+```
+</CodeGroup>
+
+---
+
+### sortBy
+
+Sorts array by specified key or comparator function.
+
+#### Parameters
+
+<ParamField path="array" type="T[]" required={true}>
+  Array to sort
+</ParamField>
+
+<ParamField path="keyOrFn" type="keyof T | ((item: T) => any)" required={true}>
+  Property key or comparator function
+</ParamField>
+
+<ParamField path="order" type="'asc' | 'desc'" required={false} default="'asc'">
+  Sort order
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="sorted" type="T[]">
+  New sorted array (original unchanged)
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { sortBy } from '@/utils/helpers';
+
+const products = [
+  { name: 'Phone', price: 699 },
+  { name: 'Laptop', price: 1299 },
+  { name: 'Tablet', price: 499 }
+];
+
+const byPrice = sortBy(products, 'price');
+// [{ name: 'Tablet', price: 499 }, { name: 'Phone', price: 699 }, ...]
+
+const byPriceDesc = sortBy(products, 'price', 'desc');
+// [{ name: 'Laptop', price: 1299 }, { name: 'Phone', price: 699 }, ...]
+
+const byName = sortBy(products, p => p.name.toLowerCase());
+```
+</CodeGroup>
+
+---
+
+## String Utilities
+
+### truncate
+
+Truncates a string to a maximum length.
+
+#### Parameters
+
+<ParamField path="str" type="string" required={true}>
+  String to truncate
+</ParamField>
+
+<ParamField path="maxLength" type="number" required={true}>
+  Maximum length
+</ParamField>
+
+<ParamField path="suffix" type="string" required={false} default="'...'">
+  Suffix to append when truncated
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="truncated" type="string">
+  Truncated string
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { truncate } from '@/utils/helpers';
+
+truncate('Hello World', 8); // "Hello..."
+truncate('Hello', 10); // "Hello"
+truncate('Hello World', 8, '…'); // "Hello W…"
+```
+</CodeGroup>
+
+---
+
+### capitalize
+
+Capitalizes the first letter of a string.
+
+#### Parameters
+
+<ParamField path="str" type="string" required={true}>
+  String to capitalize
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="capitalized" type="string">
+  Capitalized string
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { capitalize } from '@/utils/helpers';
+
+capitalize('hello world'); // "Hello world"
+capitalize('HELLO'); // "Hello"
+```
+</CodeGroup>
+
+---
+
+### slugify
+
+Converts a string to a URL-friendly slug.
+
+#### Parameters
+
+<ParamField path="str" type="string" required={true}>
+  String to slugify
+</ParamField>
+
+#### Return Value
+
+<ResponseField name="slug" type="string">
+  URL-friendly slug
+</ResponseField>
+
+#### Example
+
+<CodeGroup>
+```typescript Usage
+import { slugify } from '@/utils/helpers';
+
+slugify('Hello World!'); // "hello-world"
+slugify('React & TypeScript'); // "react-typescript"
+slugify('  Multiple   Spaces  '); // "multiple-spaces"
+```
+</CodeGroup>

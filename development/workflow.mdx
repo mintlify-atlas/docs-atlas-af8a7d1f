@@ -1,0 +1,423 @@
+---
+title: 'Development Workflow'
+description: 'Learn the development workflow, branching strategy, and collaboration practices'
+icon: 'code-branch'
+---
+
+## Git Workflow
+
+We follow a feature branch workflow with pull request reviews before merging to the main branch.
+
+### Branch Naming Convention
+
+Use descriptive branch names that follow this pattern:
+
+```bash
+<type>/<ticket-id>-<short-description>
+```
+
+**Types:**
+- `feature/` - New features or enhancements
+- `fix/` - Bug fixes
+- `hotfix/` - Urgent production fixes
+- `refactor/` - Code refactoring
+- `docs/` - Documentation updates
+- `test/` - Test additions or modifications
+
+**Examples:**
+```bash
+feature/AUTH-123-oauth-integration
+fix/UI-456-button-alignment
+refactor/PERF-789-optimize-queries
+```
+
+<Tip>
+Include the ticket or issue number in your branch name to maintain traceability.
+</Tip>
+
+## Development Process
+
+<Steps>
+  <Step title="Create a New Branch">
+    Always branch from the latest `main` branch:
+    
+    ```bash
+    git checkout main
+    git pull origin main
+    git checkout -b feature/NEW-123-user-profile
+    ```
+  </Step>
+  
+  <Step title="Make Your Changes">
+    Develop your feature with frequent, atomic commits:
+    
+    ```bash
+    # Make changes to files
+    git add .
+    git commit -m "feat: add user profile component"
+    
+    # Continue developing
+    git add .
+    git commit -m "feat: add profile edit functionality"
+    ```
+  </Step>
+  
+  <Step title="Keep Branch Updated">
+    Regularly sync your branch with main to avoid conflicts:
+    
+    ```bash
+    git fetch origin
+    git rebase origin/main
+    ```
+    
+    <Warning>
+    If you've already pushed your branch, use `git push --force-with-lease` after rebasing.
+    </Warning>
+  </Step>
+  
+  <Step title="Run Tests and Linting">
+    Ensure all checks pass before pushing:
+    
+    ```bash
+    npm run lint
+    npm run type-check
+    npm run test
+    npm run build
+    ```
+  </Step>
+  
+  <Step title="Push Your Branch">
+    Push your branch to the remote repository:
+    
+    ```bash
+    git push origin feature/NEW-123-user-profile
+    ```
+  </Step>
+  
+  <Step title="Create a Pull Request">
+    Open a pull request on GitHub/GitLab with a descriptive title and description.
+  </Step>
+</Steps>
+
+## Commit Message Convention
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) for clear and consistent commit history.
+
+### Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+### Types
+
+- `feat` - A new feature
+- `fix` - A bug fix
+- `docs` - Documentation changes
+- `style` - Code style changes (formatting, semicolons, etc.)
+- `refactor` - Code refactoring without changing functionality
+- `perf` - Performance improvements
+- `test` - Adding or updating tests
+- `chore` - Maintenance tasks, dependencies, build process
+- `ci` - CI/CD configuration changes
+
+### Examples
+
+```bash
+feat(auth): implement OAuth2 login flow
+
+fix(ui): correct button alignment on mobile devices
+
+docs: update README with setup instructions
+
+refactor(api): simplify user data fetching logic
+
+perf(images): lazy load images below the fold
+
+test(auth): add unit tests for login component
+```
+
+<Accordion title="Breaking Changes">
+  When introducing breaking changes, add `BREAKING CHANGE:` in the footer:
+  
+  ```
+  feat(api): change user endpoint response format
+  
+  BREAKING CHANGE: User endpoint now returns nested profile object
+  instead of flat structure. Update client code accordingly.
+  ```
+</Accordion>
+
+## Pull Request Guidelines
+
+### PR Title
+
+Use the same convention as commit messages:
+
+```
+feat(auth): implement OAuth2 login flow
+```
+
+### PR Description Template
+
+Provide comprehensive context in your PR description:
+
+```markdown
+## Description
+Brief description of what this PR does.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Changes Made
+- Added OAuth2 authentication flow
+- Created login component with social providers
+- Updated authentication context
+
+## Testing
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] Manual testing completed
+
+## Screenshots (if applicable)
+[Add screenshots or GIFs demonstrating the changes]
+
+## Related Issues
+Closes #123
+Related to #456
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Comments added for complex logic
+- [ ] Documentation updated
+- [ ] No new warnings generated
+```
+
+### PR Size Guidelines
+
+<Warning>
+Keep PRs small and focused. Large PRs are harder to review and more likely to introduce bugs.
+</Warning>
+
+**Ideal PR sizes:**
+- Small: < 200 lines changed
+- Medium: 200-400 lines changed
+- Large: 400-800 lines changed
+- Too Large: > 800 lines (consider breaking it up)
+
+## Code Review Process
+
+### For Authors
+
+<Steps>
+  <Step title="Self-Review First">
+    Review your own PR before requesting reviews. Check for:
+    - Code quality and readability
+    - Unnecessary console logs or debug code
+    - Proper error handling
+    - Test coverage
+  </Step>
+  
+  <Step title="Request Reviews">
+    Assign appropriate reviewers based on the changes:
+    - At least one senior developer
+    - Domain experts if touching critical areas
+  </Step>
+  
+  <Step title="Address Feedback">
+    Respond to all comments and make requested changes:
+    
+    ```bash
+    # Make changes based on feedback
+    git add .
+    git commit -m "refactor: address PR feedback"
+    git push origin feature/NEW-123-user-profile
+    ```
+  </Step>
+  
+  <Step title="Resolve Conversations">
+    Mark conversations as resolved once addressed.
+  </Step>
+</Steps>
+
+### For Reviewers
+
+Provide constructive, actionable feedback:
+
+**Good feedback:**
+```
+Consider extracting this logic into a separate hook for better reusability:
+
+[code suggestion]
+
+This would make it easier to test and reuse in other components.
+```
+
+**Poor feedback:**
+```
+This code is bad.
+```
+
+### Review Checklist
+
+- [ ] Code is clear and maintainable
+- [ ] No unnecessary complexity
+- [ ] Proper error handling
+- [ ] Security considerations addressed
+- [ ] Performance implications considered
+- [ ] Tests are comprehensive
+- [ ] Documentation is updated
+- [ ] No hardcoded values or secrets
+- [ ] Accessibility standards met
+- [ ] Browser compatibility considered
+
+## Continuous Integration
+
+All PRs must pass CI checks before merging:
+
+### Automated Checks
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type check
+        run: npm run type-check
+      - name: Test
+        run: npm run test:ci
+      - name: Build
+        run: npm run build
+```
+
+<Tip>
+CI failures should be addressed immediately. Don't request reviews until all checks pass.
+</Tip>
+
+## Merging Strategy
+
+We use **squash and merge** for most PRs to keep the main branch history clean.
+
+### When to Use Each Strategy
+
+<Accordion title="Squash and Merge (Default)">
+  Use for feature branches with multiple commits:
+  
+  ```bash
+  # Multiple commits become one
+  feat: add user profile functionality
+  
+  - Add profile component
+  - Add edit functionality
+  - Add validation
+  ```
+</Accordion>
+
+<Accordion title="Rebase and Merge">
+  Use when commits are already well-organized and atomic:
+  
+  ```bash
+  feat: add profile component
+  feat: add profile edit functionality
+  test: add profile component tests
+  ```
+</Accordion>
+
+<Accordion title="Merge Commit">
+  Rarely used, only for combining long-lived branches:
+  
+  ```bash
+  Merge branch 'release/v2.0' into main
+  ```
+</Accordion>
+
+## Conflict Resolution
+
+When encountering merge conflicts:
+
+<Steps>
+  <Step title="Update Your Branch">
+    ```bash
+    git fetch origin
+    git rebase origin/main
+    ```
+  </Step>
+  
+  <Step title="Resolve Conflicts">
+    Open conflicted files and resolve markers:
+    
+    ```diff
+    <<<<<<< HEAD
+    const userName = user.name;
+    =======
+    const userName = user.fullName;
+    >>>>>>> feature/NEW-123
+    ```
+    
+    Choose the correct resolution:
+    ```javascript
+    const userName = user.fullName;
+    ```
+  </Step>
+  
+  <Step title="Continue Rebase">
+    ```bash
+    git add .
+    git rebase --continue
+    ```
+  </Step>
+  
+  <Step title="Force Push">
+    ```bash
+    git push --force-with-lease origin feature/NEW-123-user-profile
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+Never use `git push --force` without `--force-with-lease`, as it can overwrite others' work.
+</Warning>
+
+## Release Process
+
+For production releases:
+
+1. Create a release branch from main
+2. Update version numbers and changelog
+3. Create a release PR
+4. After approval, merge and tag the release
+5. Deploy to production
+
+```bash
+# Create release branch
+git checkout -b release/v1.2.0 main
+
+# Update version
+npm version minor
+
+# Tag release
+git tag -a v1.2.0 -m "Release v1.2.0"
+git push origin v1.2.0
+```

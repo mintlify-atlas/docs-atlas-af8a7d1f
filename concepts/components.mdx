@@ -1,0 +1,693 @@
+---
+title: 'Component Philosophy'
+description: 'Deep dive into component design, composition patterns, and lifecycle management'
+icon: 'cube'
+---
+
+## Component Design Principles
+
+Great components are the foundation of maintainable React applications. Our component philosophy emphasizes clarity, reusability, and composability.
+
+<CardGroup cols={2}>
+  <Card title="Single Responsibility" icon="bullseye">
+    Each component does one thing well
+  </Card>
+  <Card title="Composable" icon="puzzle-piece">
+    Components combine to create complex interfaces
+  </Card>
+  <Card title="Predictable" icon="check-circle">
+    Same props always produce same output
+  </Card>
+  <Card title="Accessible" icon="universal-access">
+    Built with ARIA attributes and keyboard navigation
+  </Card>
+</CardGroup>
+
+## Component Types
+
+We categorize components based on their responsibilities and patterns:
+
+<Tabs>
+  <Tab title="Presentational Components">
+    ### Presentational Components
+    
+    Pure, stateless components focused solely on rendering UI. They receive data via props and don't manage side effects.
+    
+    **Characteristics:**
+    - No side effects or data fetching
+    - Minimal or no local state
+    - Highly reusable
+    - Easy to test
+    
+    ```tsx
+    interface ButtonProps {
+      variant?: 'primary' | 'secondary' | 'danger';
+      size?: 'sm' | 'md' | 'lg';
+      disabled?: boolean;
+      children: ReactNode;
+      onClick?: () => void;
+    }
+    
+    export function Button({
+      variant = 'primary',
+      size = 'md',
+      disabled = false,
+      children,
+      onClick,
+    }: ButtonProps) {
+      const className = `btn btn-${variant} btn-${size}`;
+      
+      return (
+        <button
+          className={className}
+          disabled={disabled}
+          onClick={onClick}
+          type="button"
+        >
+          {children}
+        </button>
+      );
+    }
+    ```
+    
+    <Tip>
+      Presentational components are perfect for design systems and shared UI libraries. They're framework-agnostic in concept and easily portable.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Container Components">
+    ### Container Components
+    
+    Components that handle data fetching, state management, and business logic. They pass data down to presentational components.
+    
+    **Characteristics:**
+    - Manage data fetching and side effects
+    - Connect to state management
+    - Minimal rendering logic
+    - Delegate presentation to child components
+    
+    ```tsx
+    export function UserDashboardContainer() {
+      const { userId } = useParams();
+      const { data: user, isLoading, error } = useQuery({
+        queryKey: ['user', userId],
+        queryFn: () => fetchUser(userId),
+      });
+      
+      const { mutate: updateUser } = useMutation({
+        mutationFn: updateUserProfile,
+        onSuccess: () => {
+          queryClient.invalidateQueries(['user', userId]);
+        },
+      });
+      
+      if (isLoading) return <Spinner />;
+      if (error) return <ErrorMessage error={error} />;
+      if (!user) return <NotFound />;
+      
+      return (
+        <UserDashboard
+          user={user}
+          onUpdateProfile={updateUser}
+        />
+      );
+    }
+    ```
+    
+    <Note>
+      Container components orchestrate behavior but delegate rendering. This separation makes both testing and refactoring easier.
+    </Note>
+  </Tab>
+  
+  <Tab title="Layout Components">
+    ### Layout Components
+    
+    Structural components that define page layout, spacing, and arrangement without concern for content.
+    
+    **Characteristics:**
+    - Define structure and spacing
+    - Content-agnostic
+    - Use composition via children
+    - Responsive by default
+    
+    ```tsx
+    interface PageLayoutProps {
+      header?: ReactNode;
+      sidebar?: ReactNode;
+      children: ReactNode;
+      footer?: ReactNode;
+    }
+    
+    export function PageLayout({
+      header,
+      sidebar,
+      children,
+      footer,
+    }: PageLayoutProps) {
+      return (
+        <div className="page-layout">
+          {header && (
+            <header className="page-header">
+              {header}
+            </header>
+          )}
+          
+          <div className="page-content">
+            {sidebar && (
+              <aside className="page-sidebar">
+                {sidebar}
+              </aside>
+            )}
+            
+            <main className="page-main">
+              {children}
+            </main>
+          </div>
+          
+          {footer && (
+            <footer className="page-footer">
+              {footer}
+            </footer>
+          )}
+        </div>
+      );
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Feature Components">
+    ### Feature Components
+    
+    Self-contained components that encapsulate a complete feature with its own logic, state, and UI.
+    
+    **Characteristics:**
+    - Bundle related functionality
+    - May combine container and presentational patterns
+    - Feature-specific, less reusable
+    - Can include multiple sub-components
+    
+    ```tsx
+    export function SearchWithFilters() {
+      const [query, setQuery] = useState('');
+      const [filters, setFilters] = useState<Filters>({});
+      const [results, setResults] = useState<SearchResult[]>([]);
+      const [isSearching, setIsSearching] = useState(false);
+      
+      const handleSearch = useCallback(async () => {
+        setIsSearching(true);
+        try {
+          const data = await searchService.search(query, filters);
+          setResults(data);
+        } catch (error) {
+          toast.error('Search failed');
+        } finally {
+          setIsSearching(false);
+        }
+      }, [query, filters]);
+      
+      return (
+        <div className="search-feature">
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            onSearch={handleSearch}
+          />
+          
+          <FilterPanel
+            filters={filters}
+            onChange={setFilters}
+          />
+          
+          <SearchResults
+            results={results}
+            isLoading={isSearching}
+          />
+        </div>
+      );
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Props Design
+
+Well-designed props make components intuitive and flexible.
+
+### Props Best Practices
+
+<Accordion title="Use Discriminated Unions for Variants">
+  ```tsx
+  // Bad: Independent boolean flags can create invalid states
+  interface AlertProps {
+    isSuccess?: boolean;
+    isError?: boolean;
+    isWarning?: boolean;
+    message: string;
+  }
+  
+  // Good: Discriminated union ensures only valid states
+  type AlertProps = 
+    | { variant: 'success'; message: string; }
+    | { variant: 'error'; message: string; error: Error; }
+    | { variant: 'warning'; message: string; action?: () => void; };
+  
+  export function Alert(props: AlertProps) {
+    switch (props.variant) {
+      case 'success':
+        return <div className="alert-success">{props.message}</div>;
+      
+      case 'error':
+        return (
+          <div className="alert-error">
+            {props.message}
+            <pre>{props.error.message}</pre>
+          </div>
+        );
+      
+      case 'warning':
+        return (
+          <div className="alert-warning">
+            {props.message}
+            {props.action && <button onClick={props.action}>Dismiss</button>}
+          </div>
+        );
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Provide Sensible Defaults">
+  ```tsx
+  interface PaginationProps {
+    currentPage: number;
+    totalPages: number;
+    pageSize?: number; // Default: 10
+    showFirstLast?: boolean; // Default: true
+    showPageNumbers?: boolean; // Default: true
+    maxPageButtons?: number; // Default: 5
+    onPageChange: (page: number) => void;
+  }
+  
+  export function Pagination({
+    currentPage,
+    totalPages,
+    pageSize = 10,
+    showFirstLast = true,
+    showPageNumbers = true,
+    maxPageButtons = 5,
+    onPageChange,
+  }: PaginationProps) {
+    // Implementation
+  }
+  ```
+</Accordion>
+
+<Accordion title="Use Render Props for Flexibility">
+  ```tsx
+  interface DataTableProps<T> {
+    data: T[];
+    isLoading?: boolean;
+    renderRow: (item: T, index: number) => ReactNode;
+    renderEmpty?: () => ReactNode;
+    renderLoading?: () => ReactNode;
+  }
+  
+  export function DataTable<T>({
+    data,
+    isLoading,
+    renderRow,
+    renderEmpty = () => <p>No data available</p>,
+    renderLoading = () => <Spinner />,
+  }: DataTableProps<T>) {
+    if (isLoading) return <>{renderLoading()}</>;
+    if (data.length === 0) return <>{renderEmpty()}</>;
+    
+    return (
+      <table>
+        <tbody>
+          {data.map((item, index) => (
+            <tr key={index}>{renderRow(item, index)}</tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+  
+  // Usage
+  <DataTable
+    data={users}
+    renderRow={(user) => (
+      <>
+        <td>{user.name}</td>
+        <td>{user.email}</td>
+      </>
+    )}
+  />
+  ```
+</Accordion>
+
+<Accordion title="Compose Event Handlers">
+  ```tsx
+  interface InputProps extends Omit<HTMLInputProps, 'onChange'> {
+    value: string;
+    onChange: (value: string) => void;
+    onValidate?: (value: string) => string | null; // Returns error message
+  }
+  
+  export function Input({ value, onChange, onValidate, ...htmlProps }: InputProps) {
+    const [error, setError] = useState<string | null>(null);
+    
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      
+      if (onValidate) {
+        const validationError = onValidate(newValue);
+        setError(validationError);
+      }
+      
+      onChange(newValue);
+    };
+    
+    return (
+      <div className="input-wrapper">
+        <input
+          {...htmlProps}
+          value={value}
+          onChange={handleChange}
+          aria-invalid={!!error}
+        />
+        {error && <span className="error">{error}</span>}
+      </div>
+    );
+  }
+  ```
+</Accordion>
+
+## Component Composition
+
+Composition is the key to building complex UIs from simple building blocks.
+
+### Composition Patterns
+
+```tsx
+// Pattern 1: Slots Pattern
+interface CardProps {
+  header?: ReactNode;
+  footer?: ReactNode;
+  children: ReactNode;
+}
+
+export function Card({ header, footer, children }: CardProps) {
+  return (
+    <div className="card">
+      {header && <div className="card-header">{header}</div>}
+      <div className="card-body">{children}</div>
+      {footer && <div className="card-footer">{footer}</div>}
+    </div>
+  );
+}
+
+// Usage
+<Card
+  header={<h2>User Profile</h2>}
+  footer={<Button>Save Changes</Button>}
+>
+  <UserForm />
+</Card>
+```
+
+```tsx
+// Pattern 2: Children as Function
+interface FetchDataProps<T> {
+  url: string;
+  children: (state: {
+    data: T | null;
+    loading: boolean;
+    error: Error | null;
+  }) => ReactNode;
+}
+
+export function FetchData<T>({ url, children }: FetchDataProps<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  useEffect(() => {
+    fetch(url)
+      .then(res => res.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [url]);
+  
+  return <>{children({ data, loading, error })}</>;
+}
+
+// Usage
+<FetchData<User> url="/api/users/123">
+  {({ data, loading, error }) => {
+    if (loading) return <Spinner />;
+    if (error) return <ErrorMessage error={error} />;
+    if (!data) return null;
+    return <UserProfile user={data} />;
+  }}
+</FetchData>
+```
+
+<Info>
+  Composition gives you flexibility without props explosion. Consider which pattern best fits your use case.
+</Info>
+
+## Component Lifecycle
+
+Understanding React component lifecycle helps you write efficient, bug-free code.
+
+### Modern Lifecycle with Hooks
+
+<Tabs>
+  <Tab title="Mounting">
+    ### Component Mounting
+    
+    When a component is first added to the DOM.
+    
+    ```tsx
+    function UserProfile({ userId }: Props) {
+      const [user, setUser] = useState<User | null>(null);
+      
+      // Runs once on mount
+      useEffect(() => {
+        console.log('Component mounted');
+        
+        // Fetch initial data
+        fetchUser(userId).then(setUser);
+        
+        // Cleanup function (runs on unmount)
+        return () => {
+          console.log('Component will unmount');
+        };
+      }, []); // Empty dependency array = mount only
+      
+      return <div>{user?.name}</div>;
+    }
+    ```
+    
+    <Tip>
+      Use empty dependency arrays `[]` for mount-only effects like setting up subscriptions or fetching initial data.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Updating">
+    ### Component Updating
+    
+    When props or state change, causing re-renders.
+    
+    ```tsx
+    function SearchResults({ query, filters }: Props) {
+      const [results, setResults] = useState<Result[]>([]);
+      
+      // Runs on mount AND when dependencies change
+      useEffect(() => {
+        console.log('Query or filters changed');
+        
+        const controller = new AbortController();
+        
+        searchAPI(query, filters, controller.signal)
+          .then(setResults)
+          .catch(err => {
+            if (err.name !== 'AbortError') {
+              console.error(err);
+            }
+          });
+        
+        // Cancel previous request if deps change again
+        return () => controller.abort();
+      }, [query, filters]); // Runs when query or filters change
+      
+      return <ResultsList results={results} />;
+    }
+    ```
+    
+    <Note>
+      Always include all dependencies in your useEffect array to avoid stale closure bugs. Use ESLint's exhaustive-deps rule.
+    </Note>
+  </Tab>
+  
+  <Tab title="Unmounting">
+    ### Component Unmounting
+    
+    When a component is removed from the DOM.
+    
+    ```tsx
+    function RealtimeNotifications() {
+      const [notifications, setNotifications] = useState<Notification[]>([]);
+      
+      useEffect(() => {
+        // Set up WebSocket connection
+        const ws = new WebSocket('wss://api.example.com/notifications');
+        
+        ws.onmessage = (event) => {
+          const notification = JSON.parse(event.data);
+          setNotifications(prev => [...prev, notification]);
+        };
+        
+        // Cleanup: close connection on unmount
+        return () => {
+          console.log('Closing WebSocket connection');
+          ws.close();
+        };
+      }, []);
+      
+      return (
+        <div>
+          {notifications.map(n => (
+            <NotificationItem key={n.id} notification={n} />
+          ))}
+        </div>
+      );
+    }
+    ```
+    
+    <Tip>
+      Always clean up subscriptions, timers, and connections in effect cleanup functions to prevent memory leaks.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Advanced Patterns
+
+### Custom Hooks for Logic Reuse
+
+```tsx
+// Extract component logic into reusable hooks
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
+
+// Usage in component
+function SearchInput() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      performSearch(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm]);
+  
+  return (
+    <input
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search..."
+    />
+  );
+}
+```
+
+### Error Boundaries
+
+```tsx
+class ErrorBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+    // Log to error reporting service
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="error-boundary">
+          <h2>Something went wrong</h2>
+          <details>
+            <summary>Error details</summary>
+            <pre>{this.state.error?.message}</pre>
+          </details>
+        </div>
+      );
+    }
+    
+    return this.props.children;
+  }
+}
+
+// Usage
+<ErrorBoundary fallback={<ErrorPage />}>
+  <App />
+</ErrorBoundary>
+```
+
+## Testing Components
+
+```tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders children correctly', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+  
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+  
+  it('applies variant classes correctly', () => {
+    render(<Button variant="danger">Delete</Button>);
+    const button = screen.getByText('Delete');
+    expect(button).toHaveClass('btn-danger');
+  });
+  
+  it('is disabled when disabled prop is true', () => {
+    render(<Button disabled>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeDisabled();
+  });
+});
+```
+
+<Note>
+  Test components from the user's perspective. Focus on behavior, not implementation details.
+</Note>
